@@ -1,0 +1,88 @@
+/**
+ * Copyright 2024 Google LLC
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+
+// import React, {useEffect, useState, useRef, useCallback} from 'react';
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+
+import {
+  APIProvider,
+  Map,
+  MapCameraChangedEvent,
+  InfoWindow
+} from '@vis.gl/react-google-maps';
+
+import {PoiMarkers, Poi} from "./components/PoiMarkers"
+
+import {GMAP_API_KEY, GMAP_MAP_ID} from "../env";
+
+const locations: Poi[] = [
+  {key: 'NEU@SV', location: { lat: 37.38265628429269, lng: -121.89585431612574  }}, 
+  {key: 'Airport@SJ', location: { lat: 37.36546903641177, lng: -121.92895513462652 }},
+  {key: 'IntelMusuem', location: { lat: 37.39061977133763, lng: -121.96350658655435 }},
+  {key: 'GreatAmerica',  location: { lat: 37.40235389447383, lng: -121.97682604026035 }},
+  {key: 'theRocks',   location: { lat: -33.8587568, lng: 151.2058246 }},
+  {key: 'circularQuay', location: { lat: -33.858761, lng: 151.2055688 }},
+  {key: 'harbourBridge', location: { lat: -33.852228, lng: 151.2038374 }},
+  {key: 'kingsCross', location: { lat: -33.8737375, lng: 151.222569 }},
+  {key: 'botanicGardens', location: { lat: -33.864167, lng: 151.216387 }},
+  {key: 'museumOfSydney', location: { lat: -33.8636005, lng: 151.2092542 }},
+  {key: 'maritimeMuseum', location: { lat: -33.869395, lng: 151.198648 }},
+  {key: 'kingStreetWharf', location: { lat: -33.8665445, lng: 151.1989808 }},
+  {key: 'aquarium', location: { lat: -33.869627, lng: 151.202146 }},
+  {key: 'darlingHarbour', location: { lat: -33.87488, lng: 151.1987113 }},
+  {key: 'barangaroo', location: { lat: - 33.8605523, lng: 151.1972205 }},
+];
+
+
+const App: React.FC = () => {
+  const mapApiKey = GMAP_API_KEY;
+
+  if (!mapApiKey) {
+    console.error("Google Maps API Key is not defined. Please set VITE_Maps_API_KEY in your .env file.");
+    return <div>Error: Google Maps API Key missing.</div>;
+  }
+
+  return (
+    <APIProvider apiKey={mapApiKey} onLoad={() => console.log('Maps API has loaded.')}>
+      <Map
+        defaultZoom={13}
+        defaultCenter={{ lat: 37.335480, lng: -121.893028 }}
+        onCameraChanged={ (ev: MapCameraChangedEvent) =>
+          // google map JS API 提供的 “地图被拖动” 及 “地图缩放” 后的回调函数接口
+          console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)
+        }
+        mapId={GMAP_MAP_ID}
+        >
+        <PoiMarkers pois={locations} />
+        <InfoWindow position={{ lat: 37.335480, lng: -121.893028 }}>
+          {/* 想重写成攻略列表 */}
+          The content of the info window is here.
+        </InfoWindow>
+      </Map>
+    </APIProvider>
+  );
+}
+
+
+
+export default App;
+
+const root = createRoot(document.getElementById('app'));
+root.render(
+      <App />
+  );
+
