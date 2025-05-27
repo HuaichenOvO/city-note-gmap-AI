@@ -26,6 +26,7 @@ import {
 
 import {PoiMarkers, Poi} from "./components/PoiMarkers"
 import Clickableboundry from './components/Clickableboundry';
+import SearchBar from './components/SearchBar';
 
 import {GMAP_API_KEY, GMAP_MAP_ID} from "../env";
 import {CITY_JSON} from "../pj_config";
@@ -51,8 +52,6 @@ import {CITY_JSON} from "../pj_config";
 // GeoJSON URL for US Counties
 // This file uses 'NAME' as the property for the county name.
 
-
-
 const App: React.FC = () => {
   const mapApiKey = GMAP_API_KEY;
 
@@ -62,36 +61,34 @@ const App: React.FC = () => {
   }
 
   return (
-    <APIProvider apiKey={mapApiKey} onLoad={() => console.log('Maps API has loaded.')}>
+    <APIProvider apiKey={mapApiKey} onLoad={() => console.log('Maps API has loaded.')} libraries={['places', 'drawing']}>
       <Map
         defaultZoom={7}
         defaultCenter={{ lat: 37.335480, lng: -121.893028 }}
         onCameraChanged={ (ev: MapCameraChangedEvent) =>
-          // google map JS API 提供的 “地图被拖动” 及 “地图缩放” 后的回调函数接口
+          // google map JS API 提供的 "地图被拖动" 及 "地图缩放" 后的回调函数接口
           console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)
         }
         mapId={GMAP_MAP_ID}
+        gestureHandling="greedy"
+        draggableCursor="default"
         >
+        <SearchBar />
         {/* <PoiMarkers pois={locations} /> */}
         <Clickableboundry
           geojsonUrl={CITY_JSON}
-          countyNameProperty="NAME" // Property in the GeoJSON features holding the county name
+          countyNameProperty="NAME"
         />
-        {/* <InfoWindow position={{ lat: 37.335480, lng: -121.893028 }}>
-          The content of the info window is here.
-        </InfoWindow> */}
-          {/* ⬆️ 想重写成攻略列表 */}
       </Map>
     </APIProvider>
   );
 }
 
-
-
 export default App;
 
-const root = createRoot(document.getElementById('app'));
-root.render(
-      <App />
-  );
+const container = document.getElementById('app');
+if (container) {
+  const root = createRoot(container);
+  root.render(<App />);
+}
 
