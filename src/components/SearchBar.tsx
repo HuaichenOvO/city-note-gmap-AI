@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useMap, useMapsLibrary } from '@vis.gl/react-google-maps';
-import './SearchBar.css';
+import '../../style/SearchBar.css';
 
 interface SearchBarProps {
   onPlaceSelected?: (place: google.maps.places.PlaceResult) => void;
