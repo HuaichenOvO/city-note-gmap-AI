@@ -15,7 +15,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onPlaceSelected }) => {
     if (!map || !inputRef.current || !places) return;
 
     const autocomplete = new places.Autocomplete(inputRef.current, {
-      types: ['(cities)'],
+      types: ['locality', 'administrative_area_level_1', 'administrative_area_level_2'],
       fields: ['geometry', 'name', 'place_id']
     });
 
@@ -34,7 +34,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onPlaceSelected }) => {
       <input
         ref={inputRef}
         type="text"
-        placeholder="Search for a city..."
+        placeholder="Search for a city, state, or county..."
         className="search-input"
       />
     </div>
