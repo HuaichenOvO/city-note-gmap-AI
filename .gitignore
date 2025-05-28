@@ -1,4 +1,5 @@
 node_modules
+package-lock.json
 
 *.config.js
 *.config.local.js
@@ -8,5 +9,5 @@ env.js
 */.DS_Store
 .DS_Store
 
-example.js
+design.*
 src/test_components

@@ -5,11 +5,13 @@ import { useMap } from '@vis.gl/react-google-maps';
 interface ClickableCountyBoundaryProps {
   geojsonUrl: string;
   countyNameProperty: string; // The property in GeoJSON features that holds the county name
+  onCitySelect: (city: any) => void;
 }
 
 const Clickableboundry: React.FC<ClickableCountyBoundaryProps> = ({
   geojsonUrl,
   countyNameProperty,
+  onCitySelect
 }) => {
   const map = useMap();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -71,35 +73,38 @@ const Clickableboundry: React.FC<ClickableCountyBoundaryProps> = ({
         setErrorMessage(`Error loading county boundaries: ${error.message}`);
       });
 
+    const onBoundryClick = (event: google.maps.Data.MouseEvent) => {
+      if (event.feature) {
+        const countyName = event.feature.getProperty(countyNameProperty);
+        if (countyName) {
+          let mapClickMsg = "";
+          mapClickMsg += `[CountyBoundry] Clicked on: ${countyName}`;
+          onCitySelect(countyName);
+          if (event.latLng) {
+            mapClickMsg += ` LatLng: ${event.latLng.lat()}, ${event.latLng.lng()}`;
+            map.panTo(event.latLng);
+            map.setZoom(9);
+          }
+          console.log(mapClickMsg);
+          // onCountyClick(String(countyName), event.latLng || null);
+        } else {
+          // console.warn(`Property "${countyNameProperty}" not found on clicked feature.`);
+          // onCountyClick('Unknown County (property missing)', event.latLng || null);
+          alert(`Clicked on: Unknown County (property missing)`);
+          if (event.latLng) {
+            console.log('Clicked at LatLng:', event.latLng.lat(), event.latLng.lng());
+          }
+        }
+      }
+    };
+
     // Clear previous listeners before adding new ones
     listenersRef.current.forEach(listener => listener.remove());
     listenersRef.current = [];
 
     // Add click listener
     listenersRef.current.push(
-      dataLayer.addListener('click', (event: google.maps.Data.MouseEvent) => {
-        if (event.feature) {
-          const countyName = event.feature.getProperty(countyNameProperty);
-          if (countyName) {
-            let mapClickMsg = "";
-            mapClickMsg += `[CountyBoundry] Clicked on: ${countyName}`;
-            if (event.latLng) {
-              mapClickMsg += ` LatLng: ${event.latLng.lat()}, ${event.latLng.lng()}`;
-              map.panTo(event.latLng);
-              map.setZoom(9);
-            }
-            console.log(mapClickMsg);
-            // onCountyClick(String(countyName), event.latLng || null);
-          } else {
-            // console.warn(`Property "${countyNameProperty}" not found on clicked feature.`);
-            // onCountyClick('Unknown County (property missing)', event.latLng || null);
-            alert(`Clicked on: Unknown County (property missing)`);
-            if (event.latLng) {
-              console.log('Clicked at LatLng:', event.latLng.lat(), event.latLng.lng());
-            }
-          }
-        }
-      })
+      dataLayer.addListener('click', onBoundryClick)
     );
 
     // Add mouseover listener for hover effect
