@@ -1,0 +1,1 @@
+export const CITY_JSON = "500k.json";
