@@ -15,7 +15,7 @@
 */
 
 // import React, {useEffect, useState, useRef, useCallback} from 'react';
-import React from 'react';
+import React, {useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 
 import {
@@ -26,6 +26,7 @@ import {
 
 import {PoiMarkers, Poi} from "./components/PoiMarkers"
 import Clickableboundry from './components/Clickableboundry';
+import {TestNotes, Note} from './test_components/TestNotes';
 
 import {GMAP_API_KEY, GMAP_MAP_ID} from "../env";
 import {CITY_JSON} from "../pj_config";
@@ -48,21 +49,32 @@ import {CITY_JSON} from "../pj_config";
 //   {key: 'barangaroo', location: { lat: - 33.8605523, lng: 151.1972205 }},
 // ];
 
+const countyNotes: Note[] = [
+  {noteId: "nc294t59n", title: "Beautiful place!", content: "yeyeyey", pictureLinks: null, videoLink: null},
+  {noteId: "n39vt8990", title: "Aweful place!", content: "hahhahaaga", pictureLinks: null, videoLink: null}
+];
+
 // GeoJSON URL for US Counties
 // This file uses 'NAME' as the property for the county name.
 
-
-
 const App: React.FC = () => {
-  const mapApiKey = GMAP_API_KEY;
 
-  if (!mapApiKey) {
+  if (!GMAP_API_KEY) {
     console.error("Google Maps API Key is not defined.");
     return <div>Error: Google Maps API Key missing.</div>;
   }
 
+  const [countyNameState, setCountyNameState] = useState<string | null>(null);
+
+  const onCountySelect = (city) => {
+    setCountyNameState(city);
+  }
+
+  // TODO: 增加“放大/缩小时不允许渲染 geoJson”
   return (
-    <APIProvider apiKey={mapApiKey} onLoad={() => console.log('Maps API has loaded.')}>
+    <>
+    <TestNotes countyName={countyNameState} notes={countyNotes}/>
+    <APIProvider apiKey={GMAP_API_KEY} onLoad={() => console.log('Maps API has loaded.')}>
       <Map
         defaultZoom={7}
         defaultCenter={{ lat: 37.335480, lng: -121.893028 }}
@@ -73,16 +85,19 @@ const App: React.FC = () => {
         mapId={GMAP_MAP_ID}
         >
         {/* <PoiMarkers pois={locations} /> */}
+        
         <Clickableboundry
           geojsonUrl={CITY_JSON}
-          countyNameProperty="NAME" // Property in the GeoJSON features holding the county name
+          countyNameProperty="NAME"
+          onCitySelect={onCountySelect} // Property in the GeoJSON features holding the county name
         />
         {/* <InfoWindow position={{ lat: 37.335480, lng: -121.893028 }}>
           The content of the info window is here.
         </InfoWindow> */}
-          {/* ⬆️ 想重写成攻略列表 */}
+          {/* TODO：⬆️ 想重写成攻略列表 */}
       </Map>
     </APIProvider>
+    </>
   );
 }
 
