@@ -27,6 +27,7 @@ import {
 import {PoiMarkers, Poi} from "./components/PoiMarkers"
 import Clickableboundry from './components/Clickableboundry';
 import {TestNotes, Note} from './test_components/TestNotes';
+import SearchBar from './components/SearchBar';
 
 import {GMAP_API_KEY, GMAP_MAP_ID} from "../env";
 import {CITY_JSON} from "../pj_config";
@@ -73,17 +74,20 @@ const App: React.FC = () => {
   // TODO: 增加“放大/缩小时不允许渲染 geoJson”
   return (
     <>
-    <TestNotes countyName={countyNameState} notes={countyNotes}/>
-    <APIProvider apiKey={GMAP_API_KEY} onLoad={() => console.log('Maps API has loaded.')}>
+    {/* <TestNotes countyName={countyNameState} notes={countyNotes}/> */}
+    <APIProvider apiKey={GMAP_API_KEY} onLoad={() => console.log('Maps API has loaded.')} libraries={['places', 'drawing']}>
       <Map
         defaultZoom={7}
         defaultCenter={{ lat: 37.335480, lng: -121.893028 }}
         onCameraChanged={ (ev: MapCameraChangedEvent) =>
-          // google map JS API 提供的 “地图被拖动” 及 “地图缩放” 后的回调函数接口
+          // google map JS API 提供的 "地图被拖动" 及 "地图缩放" 后的回调函数接口
           console.log('camera changed:', ev.detail.center, 'zoom:', ev.detail.zoom)
         }
         mapId={GMAP_MAP_ID}
+        gestureHandling="greedy"
+        draggableCursor="default"
         >
+        <SearchBar />
         {/* <PoiMarkers pois={locations} /> */}
         
         <Clickableboundry
@@ -91,22 +95,18 @@ const App: React.FC = () => {
           countyNameProperty="NAME"
           onCitySelect={onCountySelect} // Property in the GeoJSON features holding the county name
         />
-        {/* <InfoWindow position={{ lat: 37.335480, lng: -121.893028 }}>
-          The content of the info window is here.
-        </InfoWindow> */}
-          {/* TODO：⬆️ 想重写成攻略列表 */}
+
       </Map>
     </APIProvider>
     </>
   );
 }
 
-
-
 export default App;
 
-const root = createRoot(document.getElementById('app'));
-root.render(
-      <App />
-  );
+const container = document.getElementById('app');
+if (container) {
+  const root = createRoot(container);
+  root.render(<App />);
+}
 
