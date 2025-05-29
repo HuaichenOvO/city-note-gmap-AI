@@ -1,8 +1,6 @@
 node_modules
 package-lock.json
 
-*.config.js
-*.config.local.js
 *env.d.ts
 env.js
 
@@ -10,4 +8,3 @@ env.js
 .DS_Store
 
 design.*
-src/test_components
