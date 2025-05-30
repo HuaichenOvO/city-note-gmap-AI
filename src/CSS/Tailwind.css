@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @source "../components/*";
 @source "../test_components/*";
 
@@ -7,4 +7,4 @@
     margin: 0 auto;
     padding: 2rem;
     text-align: center;
-  }
+}
