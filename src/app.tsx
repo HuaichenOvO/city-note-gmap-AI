@@ -18,39 +18,38 @@
 import React, { useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { TestNotes, Note } from './test_components/TestNotes';
+import { NoteType } from './components/Note';
+import { NoteContainer } from './components/NoteContainer';
 import { MapComponent } from './components/MapComponent';
+import { NoteDetail } from './components/NoteDetail';
 
 import { GMAP_API_KEY, GMAP_MAP_ID } from '../env';
-
-const countyNotes: Note[] = [
-    {
-        noteId: 'nc294t59n',
-        title: 'Beautiful place!',
-        content: 'yeyeyey',
-        pictureLinks: null,
-        videoLink: null,
-    },
-    {
-        noteId: 'n39vt8990',
-        title: 'Aweful place!',
-        content: 'hahhahaaga',
-        pictureLinks: null,
-        videoLink: null,
-    },
-];
+import { CITY_JSON } from '../pj_config';
 
 const App: React.FC = () => {
     const [countyNameState, setCountyNameState] = useState<string | null>(null);
+    const [noteDetailState, setNoteDetailState] = useState<NoteType | null>(null);
+
+    const notes: NoteType[] = Array.from({ length: 20 }, (_, i) => ({
+        noteId: `${i}`,
+        title: `Event ${i + 1} in ${countyNameState}`,
+        content: `This is a detailed description for card number ${
+            i + 1
+        }. It can be quite long to test scrolling behavior.`,
+        pictureLinks: null, videoLink: null
+    }));
 
     return (
         <div className="static w-full h-full">
             <MapComponent
                 GMAP_API_KEY={GMAP_API_KEY}
                 GMAP_MAP_ID={GMAP_MAP_ID}
+                GEO_JSON_URL={CITY_JSON}
                 onCountySelect={setCountyNameState}
             />
-            <TestNotes countyName={countyNameState} notes={countyNotes} />
+            {noteDetailState ? <NoteDetail {...noteDetailState}/> : null}
+            <NoteContainer countyName={countyNameState} notes={(notes ? notes : [])} 
+                handleNoteClick={(note: NoteType | null) => setNoteDetailState(note)} />
         </div>
     );
 };
