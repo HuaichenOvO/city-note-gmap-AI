@@ -51,9 +51,9 @@ const Clickableboundry: React.FC<ClickableCountyBoundaryProps> = ({
 
         // Style for when a county boundary is hovered over
         const mouseOverStyle: google.maps.Data.StyleOptions = {
-            strokeColor: 'black',
-            strokeWeight: 2,
-            fillColor: 'rgba(148, 153, 224, 0.5)', // Light red fill on hover
+            strokeColor: 'indigo',
+            strokeWeight: 1,
+            fillColor: 'oklch(67.3% 0.182 276.935)', // Light red fill on hover
         };
 
         // Fetch and load GeoJSON data
