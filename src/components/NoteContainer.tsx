@@ -12,7 +12,7 @@ import { LoadingNote } from './LoadingNote';
 type NoteContainerProps = {
     countyName: string | null;
     notes: Array<NoteType>; // 不同的城市得到不同的array
-    handleNoteClick: (noteObj: NoteType | null) => void;
+    handleNoteClick: (noteObj: NoteType) => void;
 };
 
 export const NoteContainer = (props: NoteContainerProps) => {
@@ -54,6 +54,10 @@ export const NoteContainer = (props: NoteContainerProps) => {
                     
                     <div className="flex-grow overflow-y-auto pr-4">
                         
+                        {/* When loading or no counties selected, 
+                            loading notes are displayed, when there are notes,
+                            show the corresponding notes */}
+
                         {props.countyName ? 
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -64,7 +68,7 @@ export const NoteContainer = (props: NoteContainerProps) => {
 
                         :   
                             <div className="grid grid-cols-2 md:grid-cols-2 gap-7">
-                                {loadingNotes.map(e => <LoadingNote/>)}
+                                {loadingNotes.map((e, i) => <LoadingNote key={i}/>)}
                             </div>
                         }
 

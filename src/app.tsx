@@ -29,6 +29,13 @@ import { CITY_JSON } from '../pj_config';
 const App: React.FC = () => {
     const [countyNameState, setCountyNameState] = useState<string | null>(null);
     const [noteDetailState, setNoteDetailState] = useState<NoteType | null>(null);
+    const [noteVisibleState, setNoteVisibleState] = useState<boolean>(false);
+
+    // TODO: set default county name as user's located county or New York
+    const handleNoteClick = (note: NoteType) => {
+        setNoteVisibleState(true);
+        setNoteDetailState(note);
+    }
 
     const notes: NoteType[] = Array.from({ length: 20 }, (_, i) => ({
         noteId: `${i}`,
@@ -47,9 +54,13 @@ const App: React.FC = () => {
                 GEO_JSON_URL={CITY_JSON}
                 onCountySelect={setCountyNameState}
             />
-            {noteDetailState ? <NoteDetail {...noteDetailState}/> : null}
+            {noteVisibleState && noteDetailState ? 
+                <NoteDetail {...{note: noteDetailState, 
+                    onClickClose: () => setNoteVisibleState(false)}}/>
+                : null
+            }
             <NoteContainer countyName={countyNameState} notes={(notes ? notes : [])} 
-                handleNoteClick={(note: NoteType | null) => setNoteDetailState(note)} />
+                handleNoteClick={handleNoteClick} />
         </div>
     );
 };

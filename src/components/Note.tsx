@@ -9,9 +9,8 @@ export type NoteType = {
     videoLink: string | null;
 };
 
-export function Note(props: {note: NoteType, handleNoteClick: (note: NoteType | null) => void}) {
+export function Note(props: {note: NoteType, handleNoteClick: (note: NoteType) => void}) {
     const handleClick = () => {
-        alert(props.note.title);
         props.handleNoteClick(props.note)
     }
 
