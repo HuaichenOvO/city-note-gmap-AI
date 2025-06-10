@@ -1,23 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 
-// popWindow 只负责渲染，不负责取数据
-// 外部传入数据、点击新地点时，上级加载新数据
-// 折叠：用一个 state 控制折叠，不折叠时放出所有 note 栏
-//      折叠时收起，变成一个小矩形，但是仍然可以继续放出
-
-// 数据来自 这个 county 的 名字： county+州双字母缩写（但不是这个部件管的内容）
+// 侧边栏，包含这个county的所有note
 import { Note, NoteType } from './Note';
 import { LoadingNote } from './LoadingNote';
+import { eventContext } from '../context/eventContext';
 
 type NoteContainerProps = {
-  countyName: string | null;
-  notes: Array<NoteType>; // 不同的城市得到不同的array
   visible: boolean;
   handleNoteClick: (noteObj: NoteType) => void;
   handlePageClose: (pageState: boolean) => void;
 };
 
 export const NoteContainer = (props: NoteContainerProps) => {
+
+  const { data } = useContext(eventContext);
+
   const handleHideButtonClick = (pageState: boolean) => {
     props.handlePageClose(pageState);
   };
@@ -49,17 +46,13 @@ export const NoteContainer = (props: NoteContainerProps) => {
       <div className="relative flex left-0 basis-3/10 overflow-hidden mr-3 rounded-r-2xl">
         <div className="relative flex flex-col flex-grow bg-gray-100 shadow-lg p-3 pr-10">
           <h2 className="text-2xl font-bold mb-4 text-indigo-700 pl-3">
-            County: {props.countyName ? props.countyName : 'Not selected'}
+            County: {data.countyName ? data.countyName : 'Not selected'}
           </h2>
 
           <div className="flex-grow overflow-y-auto pr-4">
-            {/* When loading or no counties selected, 
-                            loading notes are displayed, when there are notes,
-                            show the corresponding notes */}
-
-            {props.countyName ? (
+            {data.countyName ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {props.notes.map((note) => (
+                {data.notes.map((note) => (
                   <Note
                     key={note.noteId}
                     {...{ note: note, handleNoteClick: props.handleNoteClick }}
@@ -88,7 +81,7 @@ export const NoteContainer = (props: NoteContainerProps) => {
             >
               <img src="arrow.png" className="h-3 w-3 rotate-180" />
             </button>
-            
+
           </div>
         </div>
       </div>
