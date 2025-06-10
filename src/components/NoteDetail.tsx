@@ -1,17 +1,16 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { NoteType } from './Note';
 import { ImageLoader } from './ImageLoader';
 
 export const NoteDetail = (props: {
-  note: NoteType;
+  note: NoteType | null;
   onClickClose: () => void;
 }) => {
   const [like, setLike] = useState<number>(50);
 
-  return (
+  return (props.note &&
     <div className='relative bg-gray-200 rounded-lg shadow-lg 
                     px-4 py-6 z-0'
-      key={props.note.noteId}
     >
       <button
         onClick={props.onClickClose}
@@ -30,7 +29,7 @@ export const NoteDetail = (props: {
       </button>
 
       <div className='bg-gray-100 rounded-lg shadow-lg p-6'>
-      
+
         <div className="text-2xl font-bold mb-2">{props.note.title}</div>
 
         <hr className="mb-3 bg-gray-800 mr-5"></hr>
@@ -43,28 +42,28 @@ export const NoteDetail = (props: {
           <div className="flex overflow-x-auto space-x-4 pb-2">
             {props.note.pictureLinks
               ? props.note.pictureLinks.map((link: string, idx: number) => (
-                  <ImageLoader
-                    key={
-                      link.length > 5
-                        ? link.slice(link.length - 5, link.length)
-                        : `key-${idx}`
-                    }
-                    src={link}
-                    className="w-32 h-32 object-cover rounded-md"
-                  />
-                ))
+                <ImageLoader
+                  key={
+                    link.length > 5
+                      ? link.slice(link.length - 5, link.length)
+                      : `key-${idx}`
+                  }
+                  src={link}
+                  className="w-32 h-32 object-cover rounded-md"
+                />
+              ))
               : null}
           </div>
         ) : null}
         {props.note.videoLink ? <div></div> : null}
 
-      
+
         <div className='w-full mt-3 bg-gray-200 flex'>
           <button className='flex'>
-            <img src="love.png" onClick={() => setLike(like+1)}
-                  className='bg-red-300 w-5 h-5 rounded-md
+            <img src="love.png" onClick={() => setLike(like + 1)}
+              className='bg-red-300 w-5 h-5 rounded-md
                             hover:bg-red-500' />
-             : {like} 
+            : {like}
           </button>
         </div>
       </div>
