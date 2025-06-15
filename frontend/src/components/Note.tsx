@@ -1,13 +1,6 @@
 import React from 'react';
 
-export type NoteType = {
-  noteId: string;
-  title: string;
-  content: string;
-  // 下面两个只能有一个（需要限制）
-  pictureLinks?: string[] | null;
-  videoLink?: string | null;
-};
+import { NoteType } from '../types/NoteType';
 
 export function Note(props: {
   note: NoteType;
