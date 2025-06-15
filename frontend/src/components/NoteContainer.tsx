@@ -1,7 +1,8 @@
 import React, { useState, useContext } from 'react';
 
 // 侧边栏，包含这个county的所有note
-import { Note, NoteType } from './Note';
+import { NoteType } from '../types/NoteType';
+import { Note } from './Note';
 import { LoadingNote } from './LoadingNote';
 import { eventContext } from '../context/eventContext';
 

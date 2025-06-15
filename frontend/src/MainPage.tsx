@@ -3,7 +3,7 @@ import React, { useContext, useState } from 'react';
 import { eventContext } from './context/eventContext';
 
 import { NavBar } from './components/NavBar';
-import { NoteType } from './components/Note';
+import { NoteType } from './types/NoteType';
 import { NoteContainer } from './components/NoteContainer';
 import { MapComponent } from './components/MapComponent';
 import { NoteDetail } from './components/NoteDetail';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NoteType } from './Note';
+import { NoteType } from '../types/NoteType';
 import { ImageLoader } from './ImageLoader';
 
 export const NoteDetail = (props: {
