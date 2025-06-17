@@ -22,8 +22,8 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<Long> createEvent(@Validated @RequestBody EventRequestDTO eventRequestDTO) {
-        Long eventId = eventService.postEvent(eventRequestDTO);
+    public ResponseEntity<Integer> createEvent(@Validated @RequestBody EventRequestDTO eventRequestDTO) {
+        int eventId = eventService.postEvent(eventRequestDTO);
         return ResponseEntity.ok(eventId);
     }
 
@@ -41,7 +41,7 @@ public class EventController {
 
     @PutMapping("/{id}")
     // Pre authorize
-    public ResponseEntity<Long> updateEvent(@PathVariable Long id, @RequestParam EventRequestDTO eventRequestDTO) {
+    public ResponseEntity<Integer> updateEvent(@PathVariable int id, @RequestParam EventRequestDTO eventRequestDTO) {
         return eventService.getEventById(id)
                 .map(evt -> ResponseEntity.ok(eventService.updateEvent(eventRequestDTO)))
                 .orElse(ResponseEntity.notFound().build());
@@ -49,7 +49,7 @@ public class EventController {
 
     @DeleteMapping("/{id}")
     // Pre authorize
-    public ResponseEntity<Boolean> deleteEvent(@PathVariable Long id) {
+    public ResponseEntity<Boolean> deleteEvent(@PathVariable int id) {
         return eventService.getEventById(id)
                 .map(evt -> ResponseEntity.ok(eventService.deleteEvent(id)))
                 .orElse(ResponseEntity.notFound().build());
