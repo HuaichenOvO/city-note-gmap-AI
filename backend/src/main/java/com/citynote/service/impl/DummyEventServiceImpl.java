@@ -15,7 +15,7 @@ import java.util.Optional;
 @Qualifier("DummyEventServiceImpl")
 public class DummyEventServiceImpl implements EventService {
     @Override
-    public Optional<EventResponseDTO> getEventById(Long id){
+    public Optional<EventResponseDTO> getEventById(int id){
         return Optional.empty();
     }
 
@@ -44,15 +44,15 @@ public class DummyEventServiceImpl implements EventService {
         return new ArrayList<>();
     }
 
-    public Long postEvent(EventRequestDTO eventRequestDTO){
-        return 1L;
+    public int postEvent(EventRequestDTO eventRequestDTO){
+        return 1;
     }
 
-    public Long updateEvent(EventRequestDTO eventRequestDTO){
-        return 1L;
+    public int updateEvent(EventRequestDTO eventRequestDTO){
+        return 1;
     }
 
-    public Boolean deleteEvent(Long eventId){
+    public Boolean deleteEvent(int eventId){
         return false;
     }
 }

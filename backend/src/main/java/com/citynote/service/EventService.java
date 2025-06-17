@@ -9,10 +9,10 @@ import java.util.Optional;
 
 @Service
 public interface EventService {
-    Optional<EventResponseDTO> getEventById(Long id);
+    Optional<EventResponseDTO> getEventById(int id);
     List<EventResponseDTO> getEventsByCounty(String countyId); // a list of county-aggregated
     List<EventResponseDTO> getUserPostedEvents(Long userId); // a list of user-posted history
-    Long postEvent(EventRequestDTO eventRequestDTO); // return new event's ID
-    Long updateEvent(EventRequestDTO eventRequestDTO); // return new event's ID
-    Boolean deleteEvent(Long eventId); // true if successfully deleted
+    int postEvent(EventRequestDTO eventRequestDTO); // return new event's ID
+    int updateEvent(EventRequestDTO eventRequestDTO); // return new event's ID
+    Boolean deleteEvent(int eventId); // true if successfully deleted
 }
