@@ -11,12 +11,11 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Getter
-@Setter
+@Table(name = "events")
 public class EventEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private int id;
 
     @Column(nullable = false)
     private String title;
@@ -25,18 +24,18 @@ public class EventEntity {
     private String content;
 
     @Column(nullable = false)
+    private int eventType;
+
+    @Column(nullable = false)
+    private int likes;
+
+    @Column(nullable = false)
     private LocalDateTime createDate;
 
     @Column(nullable = false)
-    private LocalDateTime LastUpdateDate;
+    private LocalDateTime lastUpdateDate;
 
     @Column(nullable = false)
     private String county;
 
-    private String pictureArrayLinks;
-
-    private String videoLink;
-
-    @Column(nullable = false)
-    private int eventType;
 }
