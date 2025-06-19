@@ -1,4 +1,4 @@
-package com.citynote.dto;
+package com.citynote.entity.enums;
 
 public enum EventType{
     TEXT,

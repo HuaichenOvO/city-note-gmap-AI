@@ -1,41 +1,56 @@
 package com.citynote.entity;
 
-import com.citynote.dto.EventType;
-import jakarta.annotation.Nullable;
+import com.citynote.entity.enums.EventType;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
 @Table(name = "events")
+@DynamicInsert
 public class EventEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "event_id")
     private int id;
 
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false)
-    private int eventType;
+    @OneToMany(fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            mappedBy = "blob_id"
+    )
+    private List<BlobEntity> blobs;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 8)
+    private EventType eventType;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "county_id")
+    private CountyEntity county;
+
+    @ColumnDefault("0")
     @Column(nullable = false)
     private int likes;
 
     @Column(nullable = false)
     private LocalDateTime createDate;
 
-    @Column(nullable = false)
     private LocalDateTime lastUpdateDate;
 
-    @Column(nullable = false)
-    private String county;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_profile_id")
+    private UserProfile userProfile;
 
 }
