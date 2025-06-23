@@ -43,12 +43,12 @@ export const MapComponent: React.FC<MapProps> = (props: MapProps) => {
       <Map
         defaultZoom={7}
         defaultCenter={{ lat: 37.33548, lng: -121.893028 }}
-        onCameraChanged={(ev: MapCameraChangedEvent) => {
-          console.log(
-            `camera changed: ${ev.detail.center} zoom: ${ev.detail.zoom}`,
-          );
-          props.onBoundaryDrag();
-        }}
+        // onCameraChanged={(ev: MapCameraChangedEvent) => {
+        //   console.log(
+        //     `camera changed: ${ev.detail.center} zoom: ${ev.detail.zoom}`,
+        //   );
+        //   props.onBoundaryDrag();
+        // }}
         mapId={props.GMAP_MAP_ID}
         gestureHandling="greedy"
         draggableCursor="default"

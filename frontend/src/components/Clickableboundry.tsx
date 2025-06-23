@@ -82,11 +82,11 @@ const Clickableboundry: React.FC<ClickableCountyBoundaryProps> = ({
           let mapClickMsg = '';
           mapClickMsg += `[CountyBoundry] Clicked on: ${countyName}`;
           onCitySelect(countyName);
-          if (event.latLng) {
-            mapClickMsg += ` LatLng: ${event.latLng.lat()}, ${event.latLng.lng()}`;
-            map.panTo(event.latLng);
-            map.setZoom(9);
-          }
+          // if (event.latLng) {
+          //   mapClickMsg += ` LatLng: ${event.latLng.lat()}, ${event.latLng.lng()}`;
+          //   map.panTo(event.latLng);
+          //   map.setZoom(9);
+          // }
           console.log(mapClickMsg);
           // onCountyClick(String(countyName), event.latLng || null);
         } else {
