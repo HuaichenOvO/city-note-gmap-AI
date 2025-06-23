@@ -57,6 +57,11 @@ export const EventContextProvider:
         }
         else {
           eventApi.getEventsByCounty(countyName)
+            .then(notes => {
+              console.log(`[EventContext] Received notes`);
+              console.log(notes);
+              return notes;
+            })
             .then(response => setNotes(response));
         }
       }, [countyName]
