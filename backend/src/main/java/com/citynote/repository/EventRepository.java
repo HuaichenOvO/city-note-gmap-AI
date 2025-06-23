@@ -3,19 +3,15 @@ package com.citynote.repository;
 import com.citynote.entity.CountyEntity;
 import com.citynote.entity.EventEntity;
 import com.citynote.entity.UserProfile;
-import com.citynote.entity.enums.EventType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<EventEntity, Integer> {
     Optional<EventEntity> findById(int id);
-
-    Page<EventEntity> findAllEvents(Pageable pageable);
 
     Page<EventEntity> findByCounty(CountyEntity county, Pageable pageable);
 
