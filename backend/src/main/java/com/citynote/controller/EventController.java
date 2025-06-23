@@ -17,7 +17,7 @@ public class EventController {
 
     private final EventService eventService;
 
-    public EventController(@Qualifier("DummyEventServiceImpl") EventService eventService) {
+    public EventController(@Qualifier("RdbEventServiceImpl") EventService eventService) {
         this.eventService = eventService;
     }
 
