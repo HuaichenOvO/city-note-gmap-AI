@@ -12,16 +12,16 @@ public class BlobEntity {
     @Column(name = "blob_id")
     private int id;
 
-    @Column(nullable = false, updatable = false, length = 255)
+    @Column(nullable = false, updatable = false)
     private String s3Link;
 
-    @Column(nullable = false, updatable = false, length = 255)
+    @Column(nullable = false, updatable = false)
     private String s3Key;
 
     @Column(nullable = false, updatable = false, length = 5)
     private int inPlaceOrder;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "event_id", updatable = false)
     private EventEntity event;
 
