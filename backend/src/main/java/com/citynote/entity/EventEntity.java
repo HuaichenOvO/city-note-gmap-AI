@@ -28,7 +28,7 @@ public class EventEntity {
     @OneToMany(fetch = FetchType.EAGER,
             cascade = CascadeType.ALL,
             orphanRemoval = true,
-            mappedBy = "blob_id"
+            mappedBy = "event"
     )
     private List<BlobEntity> blobs;
 

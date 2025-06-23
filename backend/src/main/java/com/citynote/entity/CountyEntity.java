@@ -1,6 +1,5 @@
 package com.citynote.entity;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,10 +13,10 @@ public class CountyEntity {
     private int id;
 
     @Column(nullable = false, updatable = false)
-    private String name;
+    private String countyName;
 
     @Column(nullable = false, updatable = false)
-    private String state;
+    private String countyState;
 
     @Column(nullable = false, updatable = false, unique = true)
     private String countyKey;
