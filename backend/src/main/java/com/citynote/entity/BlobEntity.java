@@ -18,6 +18,9 @@ public class BlobEntity {
     @Column(nullable = false, updatable = false)
     private String s3Key;
 
+    // inplace order would not be updated, and if new pictures are inserted or 
+    // old pictures are deleted, the whole list of pictures will be re-ordered 
+    // based on existing pictures' auto-incrementing in_place_order
     @Column(nullable = false, updatable = false, length = 5)
     private int inPlaceOrder;
 
