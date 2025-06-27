@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface CountyRepository extends JpaRepository<CountyEntity, Integer> {
     Optional<CountyEntity> findById(int id);
 
-    Optional<CountyEntity> findByNameEqualsIgnoreCase(String countyName);
+    Optional<CountyEntity> findByCountyNameEqualsIgnoreCase(String countyName);
 
-    List<CountyEntity> findByStateEqualsIgnoreCase(String state);
+    List<CountyEntity> findByCountyStateEqualsIgnoreCase(String state);
 }
