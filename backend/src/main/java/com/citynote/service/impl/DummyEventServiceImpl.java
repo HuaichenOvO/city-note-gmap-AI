@@ -4,6 +4,9 @@ import com.citynote.dto.EventRequestDTO;
 import com.citynote.dto.EventResponseDTO;
 import com.citynote.service.EventService;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,36 +22,36 @@ public class DummyEventServiceImpl implements EventService {
         return Optional.empty();
     }
 
-    public List<EventResponseDTO> getEventsByCounty(String countyId){
+    public Page<EventResponseDTO> getPagesOfEventsByCounty(int countyId, Pageable pageable){
         EventResponseDTO myResponse = new EventResponseDTO();
         myResponse.setId(10);
         myResponse.setTitle("Dummy title " + countyId + " - 1");
-        myResponse.setContent("Dummy content reslt");
+        myResponse.setContent("Dummy content reslt 1");
         myResponse.setDate("2025-06-10");
-        myResponse.setCounty(countyId);
+        myResponse.setCounty(String.valueOf(countyId));
         myResponse.setPictureLinks(new String[0]);
         myResponse.setVideoLink("");
 
         EventResponseDTO myResponse2 = new EventResponseDTO();
         myResponse2.setId(11);
         myResponse2.setTitle("Dummy title " + countyId + " - 2");
-        myResponse2.setContent("Dummy content reslt");
+        myResponse2.setContent("Dummy content reslt 2");
         myResponse2.setDate("2025-06-10");
-        myResponse2.setCounty(countyId);
+        myResponse.setCounty(String.valueOf(countyId));
         myResponse2.setPictureLinks(new String[0]);
         myResponse2.setVideoLink("");
-        return new ArrayList<>(List.of(myResponse, myResponse2));
+        return new PageImpl<>(List.of(myResponse, myResponse2));
     }
 
-    public List<EventResponseDTO> getUserPostedEvents(Long userId){
-        return new ArrayList<>();
+    public Page<EventResponseDTO> getPagesOfUserPostedEvents(Long userId, Pageable pageable){
+        return new PageImpl<>(new ArrayList<>());
     }
 
     public int postEvent(EventRequestDTO eventRequestDTO){
         return 1;
     }
 
-    public int updateEvent(EventRequestDTO eventRequestDTO){
+    public int updateEvent(int EventId, EventRequestDTO eventRequestDTO){
         return 1;
     }
 
