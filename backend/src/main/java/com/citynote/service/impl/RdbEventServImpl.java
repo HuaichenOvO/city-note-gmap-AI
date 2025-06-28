@@ -49,6 +49,7 @@ public class RdbEventServImpl implements EventService {
                 .map(this::DTOConverter);
     }
 
+    @Transactional
     public Page<EventResponseDTO> getPagesOfUserPostedEvents(Long userId, Pageable pageable){
         // may have potential value risks
         int userProfileId = userId.intValue();
@@ -57,6 +58,7 @@ public class RdbEventServImpl implements EventService {
                 .map(this::DTOConverter);
     }
 
+    @Transactional
     public int postEvent(EventRequestDTO eventRequestDTO){
         EventEntity eventEntity = new EventEntity();
         eventEntity.setTitle(eventRequestDTO.getTitle());
@@ -115,6 +117,7 @@ public class RdbEventServImpl implements EventService {
                 .orElse(-1);
     }
 
+    @Transactional
     public Boolean deleteEvent(int eventId){
         // if no related data in DB, there will be no errors
         Optional<EventEntity> eOptional = eventRepository.findById(eventId);

@@ -8,6 +8,7 @@ export const eventApi = {
         return response.data;
     },
     getEventsByCounty: async (countyId: string) => {
+        // TODO: add page flipping
         const response = await api.get<any>(`event/county/${countyId}?page=0&size=10`);
         console.log("[eventApi.getEventsByCounty]", response.data);
 
