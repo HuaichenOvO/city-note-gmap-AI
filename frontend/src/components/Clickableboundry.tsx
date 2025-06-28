@@ -5,13 +5,15 @@ import { useMap } from '@vis.gl/react-google-maps';
 interface ClickableCountyBoundaryProps {
   geojsonUrl: string;
   countyNameProperty: string; // The property in GeoJSON features that holds the county name
-  onCitySelect: (city: any) => void;
+  countyIdProperty: string;
+  onCountySelect: (cId: any, cName: any) => void;
 }
 
 const Clickableboundry: React.FC<ClickableCountyBoundaryProps> = ({
   geojsonUrl,
   countyNameProperty,
-  onCitySelect,
+  countyIdProperty,
+  onCountySelect,
 }) => {
   const map = useMap();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -78,10 +80,15 @@ const Clickableboundry: React.FC<ClickableCountyBoundaryProps> = ({
     const onBoundryClick = (event: google.maps.Data.MouseEvent) => {
       if (event.feature) {
         const countyName = event.feature.getProperty(countyNameProperty);
-        if (countyName) {
+        const countyId = event.feature.getProperty(countyIdProperty);
+        if (countyId !== null && countyName !== null
+          && typeof countyId !== "undefined"
+          && typeof countyName !== "undefined") {
+          const countyIdStr = new String(countyId);
+          const countyNameStr = new String(countyName);
           let mapClickMsg = '';
-          mapClickMsg += `[CountyBoundry] Clicked on: ${countyName}`;
-          onCitySelect(countyName);
+          mapClickMsg += `[CountyBoundry] Clicked on: ${countyIdStr} - ${countyNameStr}`;
+          onCountySelect(countyIdStr, countyNameStr);
           // if (event.latLng) {
           //   mapClickMsg += ` LatLng: ${event.latLng.lat()}, ${event.latLng.lng()}`;
           //   map.panTo(event.latLng);
@@ -90,9 +97,9 @@ const Clickableboundry: React.FC<ClickableCountyBoundaryProps> = ({
           console.log(mapClickMsg);
           // onCountyClick(String(countyName), event.latLng || null);
         } else {
-          // console.warn(`Property "${countyNameProperty}" not found on clicked feature.`);
+          // console.warn(`Property "${countyIdProperty}" and "${countyNameProperty}" not found on clicked feature.`);
           // onCountyClick('Unknown County (property missing)', event.latLng || null);
-          alert(`Clicked on: Unknown County (property missing)`);
+          console.log(`[CountyBoundry] Clicked on: Unknown County (property missing): ${countyId}, ${countyName}`);
           if (event.latLng) {
             console.log(
               'Clicked at LatLng:',
