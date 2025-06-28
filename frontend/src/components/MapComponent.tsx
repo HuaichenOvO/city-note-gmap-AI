@@ -28,9 +28,9 @@ export const MapComponent: React.FC<MapProps> = (props: MapProps) => {
     return <div>Error: Google Maps API Key missing.</div>;
   }
 
-  const handleCountySelect = (county: string) => {
-    props.onCountySelect(county);
-    handler.onCountyClick(county);
+  const handleCountySelect = (cId: string, cName: string) => {
+    props.onCountySelect(cId);
+    handler.setEventContextCounty_Id_Name(cId, cName);
   }
 
   // TODO: 增加“放大/缩小时不允许渲染 geoJson”
@@ -57,8 +57,9 @@ export const MapComponent: React.FC<MapProps> = (props: MapProps) => {
 
         <Clickableboundry
           geojsonUrl={props.GEO_JSON_URL}
-          countyNameProperty="NAME"
-          onCitySelect={handleCountySelect} // Property in the GeoJSON features holding the county name
+          countyNameProperty="coty_name_long"
+          countyIdProperty="coty_code"
+          onCountySelect={handleCountySelect} // Property in the GeoJSON features holding the county name
         />
       </Map>
     </APIProvider>
