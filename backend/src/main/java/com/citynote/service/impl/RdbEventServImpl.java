@@ -42,6 +42,7 @@ public class RdbEventServImpl implements EventService {
                 .map(this::DTOConverter);
     }
 
+    @Transactional
     public Page<EventResponseDTO> getPagesOfEventsByCounty(int countyId, Pageable pageable){
         return eventRepository
                 .findByCounty_Id(countyId, pageable)
