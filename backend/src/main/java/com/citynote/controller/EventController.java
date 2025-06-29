@@ -5,6 +5,9 @@ import com.citynote.dto.EventRequestDTO;
 import com.citynote.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -28,30 +31,44 @@ public class EventController {
     }
 
     @GetMapping("/county/{countyId}")
-    public ResponseEntity<List<EventResponseDTO>> getEventsByCounty(@PathVariable String countyId) {
-        List<EventResponseDTO> events = eventService.getEventsByCounty(countyId);
+    public ResponseEntity<Page<EventResponseDTO>> getEventsByCounty(
+            @PathVariable int countyId,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<EventResponseDTO> events = eventService.getPagesOfEventsByCounty(countyId, pageable);
         return ResponseEntity.ok(events);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<EventResponseDTO>> getEventsByUser(@PathVariable Long userId) {
-        List<EventResponseDTO> events = eventService.getUserPostedEvents(userId);
+    public ResponseEntity<Page<EventResponseDTO>> getEventsByUser(
+            @PathVariable Long userId,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<EventResponseDTO> events = eventService.getPagesOfUserPostedEvents(userId, pageable);
         return ResponseEntity.ok(events);
     }
 
     @PutMapping("/{id}")
     // Pre authorize
     public ResponseEntity<Integer> updateEvent(@PathVariable int id, @RequestParam EventRequestDTO eventRequestDTO) {
+        // TODO: remove redundant existence check (either controller or service)
         return eventService.getEventById(id)
-                .map(evt -> ResponseEntity.ok(eventService.updateEvent(eventRequestDTO)))
+                .map(evt ->
+                        ResponseEntity.ok(eventService.updateEvent(id, eventRequestDTO))
+                )
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
     // Pre authorize
     public ResponseEntity<Boolean> deleteEvent(@PathVariable int id) {
+        // TODO: remove redundant existence check (either controller or service)
         return eventService.getEventById(id)
-                .map(evt -> ResponseEntity.ok(eventService.deleteEvent(id)))
+                .map(
+                        evt -> ResponseEntity.ok(eventService.deleteEvent(id))
+                )
                 .orElse(ResponseEntity.notFound().build());
     }
 
