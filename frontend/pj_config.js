@@ -1,1 +1,1 @@
-export const CITY_JSON = "500k.json";
+export const CITY_JSON = "counties.json";

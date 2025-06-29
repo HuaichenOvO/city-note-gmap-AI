@@ -1,4 +1,4 @@
-INSERT INTO TABLE users (id, username, email, password, first_name, last_name)
+INSERT INTO users (id, username, email, password, first_name, last_name)
 VALUES
   (1, 'chrishernandez', 'walkerlisa@example.net', '%Jl1W`U^8g_$xh6RPi9E', 'Arthur', 'Atkins'),
   (2, 'ebradford', 'crussell@example.net', 'I>/4sujzlCy}FX~#v,]o', 'Ryan', 'Stevens'),
