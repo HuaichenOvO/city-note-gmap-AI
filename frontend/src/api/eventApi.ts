@@ -1,9 +1,9 @@
 import api from "./config";
 
-import { NoteType } from '../types/NoteType';
+import { NoteType, CreateEventType } from '../types/NoteType';
 
 export const eventApi = {
-    createEvent: async (note: NoteType) => {
+    createEvent: async (note: CreateEventType) => {
         const response = await api.post(`event`, note);
         return response.data;
     },
@@ -22,7 +22,11 @@ export const eventApi = {
                     videoLink: i.videoLink,
                     date: new Date(i.date),
                     county: i.county,
-                    eventType: i.eventType
+                    eventType: i.eventType,
+                    likes: i.likes || 0,
+                    authorUsername: i.authorUsername || "Unknown User",
+                    authorFirstName: i.authorFirstName || "",
+                    authorLastName: i.authorLastName || ""
                 })
             );
         }
@@ -36,12 +40,24 @@ export const eventApi = {
         const response = await api.get<NoteType[]>(`event/county/${userId}`);
         return response.data;
     },
-    updateEvent: async (noteId: string, note: NoteType) => {
+    updateEvent: async (noteId: string, note: CreateEventType) => {
         const response = await api.put(`event/${noteId}`, note);
         return response.data;
     },
     deleteEvent: async (noteId: string) => {
         const response = await api.delete(`event/${noteId}`);
+        return response.data;
+    },
+    updateEventLikes: async (noteId: string) => {
+        const response = await api.put(`event/${noteId}/like`);
+        return response.data;
+    },
+    canUserModifyEvent: async (noteId: string) => {
+        const response = await api.get(`event/${noteId}/can-modify`);
+        return response.data;
+    },
+    getEventById: async (noteId: string) => {
+        const response = await api.get(`event/${noteId}`);
         return response.data;
     }
 }

@@ -1,12 +1,62 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { authApi } from "../api/authApi";
+import { User } from "../api/userApi";
 
-export type NavBarProps = {
-    avatarUrl: string;
-    userName: string;
-};
+export const NavBar = () => {
+    const [user, setUser] = useState<User | null>(null);
 
-export const NavBar = ({...props}) => {
+    useEffect(() => {
+        // Get user info from localStorage or API
+        const token = localStorage.getItem('token');
+        console.log('NavBar: Token found:', !!token);
+        if (token) {
+            authApi.getCurrentUser()
+                .then(userData => {
+                    console.log('NavBar: User data received:', userData);
+                    setUser(userData);
+                })
+                .catch((error) => {
+                    console.error('NavBar: Failed to get user data:', error);
+                    localStorage.removeItem('token');
+                    setUser(null);
+                });
+        }
+    }, []);
+
+    const handleLogout = () => {
+        authApi.logout();
+        setUser(null);
+        window.location.replace('/login');
+    };
+
     return (
-        <>NavBar</>
-    )
+        <nav className="bg-white shadow-sm border-b border-gray-200 px-4 py-3">
+            <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-4">
+                    <h1 className="text-xl font-semibold text-gray-800">City Note</h1>
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                    {user && (
+                        <>
+                            <div className="flex items-center space-x-2">
+                                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                    <span className="text-white text-sm font-medium">
+                                        {user.username.charAt(0).toUpperCase()}
+                                    </span>
+                                </div>
+                                <span className="text-gray-700 font-medium">{user.username}</span>
+                            </div>
+                            <button
+                                onClick={handleLogout}
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200"
+                            >
+                                Logout
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+        </nav>
+    );
 };

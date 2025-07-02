@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 
 import { eventContext } from './context/eventContext';
 
@@ -9,6 +9,7 @@ import { MapComponent } from './components/MapComponent';
 import { NoteDetail } from './components/NoteDetail';
 import { GMAP_API_KEY, GMAP_MAP_ID } from '../env';
 import { CITY_JSON } from '../pj_config';
+import { eventApi } from './api/eventApi';
 
 const MainPage: React.FC = () => {
   const [noteDetailDataState, setNoteDetailDataState] = useState<NoteType | null>(null);
@@ -16,6 +17,17 @@ const MainPage: React.FC = () => {
   const [notePageVisibleState, setNotePageVisibleState] = useState<boolean>(true);
 
   const { data } = useContext(eventContext);
+
+  // Update current event detail when event list is refreshed
+  useEffect(() => {
+    if (noteDetailDataState && noteDetailVisibleState) {
+      // Find the corresponding event from the updated event list
+      const updatedNote = data.notes.find(note => note.noteId === noteDetailDataState.noteId);
+      if (updatedNote) {
+        setNoteDetailDataState(updatedNote);
+      }
+    }
+  }, [data.notes, noteDetailDataState, noteDetailVisibleState]);
 
   const handleCountySelect = () => {
     setNoteDetailVisibleState(false);
@@ -45,7 +57,9 @@ const MainPage: React.FC = () => {
     <>
       <div className="h-1/20">
         <NavBar />
-        {` | County name: ${data.countyName}, \nWhich note is displaying? ${noteDetailDataState?.title}\nIs the note visible now? ${noteDetailVisibleState}\nIs the side page on? ${notePageVisibleState}`}
+        <div className="text-xs text-gray-500 px-4 py-1">
+          County: {data.countyName} | Note: {noteDetailDataState?.title} | Detail visible: {noteDetailVisibleState} | Side page: {notePageVisibleState}
+        </div>
       </div>
 
       <div className="relative flex flex-row w-full h-19/20 z-1">

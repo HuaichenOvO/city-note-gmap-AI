@@ -52,8 +52,12 @@ public class EventController {
 
     @PutMapping("/{id}")
     // Pre authorize
-    public ResponseEntity<Integer> updateEvent(@PathVariable int id, @RequestParam EventRequestDTO eventRequestDTO) {
-        // TODO: remove redundant existence check (either controller or service)
+    public ResponseEntity<Integer> updateEvent(@PathVariable int id, @RequestBody EventRequestDTO eventRequestDTO) {
+        // Check user permissions
+        if (!eventService.canUserModifyEvent(id)) {
+            return ResponseEntity.status(403).build();
+        }
+        
         return eventService.getEventById(id)
                 .map(evt ->
                         ResponseEntity.ok(eventService.updateEvent(id, eventRequestDTO))
@@ -64,12 +68,28 @@ public class EventController {
     @DeleteMapping("/{id}")
     // Pre authorize
     public ResponseEntity<Boolean> deleteEvent(@PathVariable int id) {
-        // TODO: remove redundant existence check (either controller or service)
+        // Check user permissions
+        if (!eventService.canUserModifyEvent(id)) {
+            return ResponseEntity.status(403).build();
+        }
+        
         return eventService.getEventById(id)
                 .map(
                         evt -> ResponseEntity.ok(eventService.deleteEvent(id))
                 )
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}/like")
+    public ResponseEntity<Boolean> updateEventLikes(@PathVariable int id) {
+        return eventService.getEventById(id)
+                .map(evt -> ResponseEntity.ok(eventService.incrementEventLikes(id)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/can-modify")
+    public ResponseEntity<Boolean> canUserModifyEvent(@PathVariable int id) {
+        return ResponseEntity.ok(eventService.canUserModifyEvent(id));
     }
 
 }

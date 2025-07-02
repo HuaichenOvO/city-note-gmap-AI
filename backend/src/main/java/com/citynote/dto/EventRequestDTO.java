@@ -9,6 +9,7 @@ public class EventRequestDTO {
     private String title;
     private String content;
     private String county;
+    private Integer countyId;
     private String[] pictureLinks;
     private String videoLink;
 }

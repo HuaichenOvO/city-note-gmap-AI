@@ -11,7 +11,8 @@ type eventContextType = {
   },
   handler: {
     setEventContextCounty_Id_Name:
-    (countyId: string, countyName: string) => void
+    (countyId: string, countyName: string) => void,
+    refreshNotes: () => void
   }
 }
 
@@ -21,7 +22,8 @@ export const eventContext = createContext<eventContextType>({
     countyName: null,
     notes: []
   }, handler: {
-    setEventContextCounty_Id_Name: (cName: string, cId: string) => { return }
+    setEventContextCounty_Id_Name: (cName: string, cId: string) => { return },
+    refreshNotes: () => { return }
   }
 });
 
@@ -37,11 +39,19 @@ export const EventContextProvider:
     useEffect(
       () => {
         if (!countyId) {
+          console.log('No countyId set, skipping notes fetch');
           return;
         }
         else {
+          console.log('Fetching notes for county:', countyId);
           eventApi.getEventsByCounty(countyId)
-            .then(notes => setNotes(notes));
+            .then(notes => {
+              console.log('Fetched notes:', notes);
+              setNotes(notes);
+            })
+            .catch(error => {
+              console.error('Failed to fetch notes:', error);
+            });
         }
       }, [countyId]
     );
@@ -57,6 +67,21 @@ export const EventContextProvider:
         setEventContextCounty_Id_Name: (id: string, name: string) => {
           setCountyId(id);
           setCountyName(name);
+        },
+        refreshNotes: () => {
+          if (!countyId) {
+            console.warn('Cannot refresh notes: countyId is null');
+            return;
+          }
+          console.log('Refreshing notes for county:', countyId);
+          eventApi.getEventsByCounty(countyId)
+            .then(notes => {
+              console.log('Refreshed notes:', notes);
+              setNotes(notes);
+            })
+            .catch(error => {
+              console.error('Failed to refresh notes:', error);
+            });
         }
       }
     };

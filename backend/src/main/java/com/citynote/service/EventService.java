@@ -27,4 +27,10 @@ public interface EventService {
 
     // true if successfully deleted
     Boolean deleteEvent(int eventId);
+
+    // increment likes count for an event
+    Boolean incrementEventLikes(int eventId);
+
+    // check if current user can modify an event
+    Boolean canUserModifyEvent(int eventId);
 }

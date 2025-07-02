@@ -16,5 +16,9 @@ public class EventResponseDTO {
     private String[] pictureLinks;
     private String videoLink;
     private EventType eventType;
+    private int likes;
+    private String authorUsername;
+    private String authorFirstName;
+    private String authorLastName;
 }
 

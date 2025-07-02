@@ -58,4 +58,14 @@ public class DummyEventServiceImpl implements EventService {
     public Boolean deleteEvent(int eventId){
         return false;
     }
+
+    @Override
+    public Boolean incrementEventLikes(int eventId) {
+        return true;
+    }
+
+    @Override
+    public Boolean canUserModifyEvent(int eventId) {
+        return false;
+    }
 }

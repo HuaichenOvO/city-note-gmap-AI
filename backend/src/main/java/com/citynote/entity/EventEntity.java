@@ -49,7 +49,7 @@ public class EventEntity {
 
     private LocalDateTime lastUpdateDate;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "user_profile_id")
     private UserProfile userProfile;
 
