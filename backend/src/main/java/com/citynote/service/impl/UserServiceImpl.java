@@ -1,7 +1,9 @@
 package com.citynote.service.impl;
 
 import com.citynote.entity.User;
+import com.citynote.entity.UserProfile;
 import com.citynote.repository.UserRepository;
+import com.citynote.repository.UserProfileRepository;
 import com.citynote.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,18 +15,26 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserProfileRepository userProfileRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, UserProfileRepository userProfileRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.userProfileRepository = userProfileRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public User createUser(User user) {
-        // 加密密码
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // 自动创建UserProfile
+        UserProfile profile = new UserProfile();
+        profile.setUser(savedUser);
+        userProfileRepository.save(profile);
+
+        return savedUser;
     }
 
     @Override
@@ -58,5 +68,27 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public void ensureAllUsersHaveProfile() {
+        List<User> users = userRepository.findAll();
+        int createdCount = 0;
+        
+        for (User user : users) {
+            if (userProfileRepository.findByUsername(user.getUsername()).isEmpty()) {
+                UserProfile profile = new UserProfile();
+                profile.setUser(user);
+                userProfileRepository.save(profile);
+                createdCount++;
+                System.out.println("Created UserProfile for user: " + user.getUsername());
+            }
+        }
+        
+        if (createdCount > 0) {
+            System.out.println("Created " + createdCount + " UserProfile(s) for existing users");
+        } else {
+            System.out.println("All users already have UserProfile");
+        }
     }
 } 

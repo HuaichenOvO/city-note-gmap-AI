@@ -14,10 +14,8 @@ public class UserProfile {
     @Column(name = "user_profile_id")
     private int id;
 
-    @OneToOne(cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER,
-            orphanRemoval = true,
-            optional = false)
+    @OneToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
     @OneToMany(cascade = CascadeType.ALL,

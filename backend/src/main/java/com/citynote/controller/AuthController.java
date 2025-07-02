@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -56,15 +57,33 @@ public class AuthController {
         user.setEmail(registerRequest.getEmail());
         user.setPassword(registerRequest.getPassword());
 
-        User savedUser = userService.createUser(user);
-        return ResponseEntity.ok(convertToDTO(savedUser));
+        try {
+            User savedUser = userService.createUser(user);
+            return ResponseEntity.ok(convertToDTO(savedUser));
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.badRequest().body("Username already exists");
+        }
     }
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
-        User user = userService.getUserByUsername(authentication.getName())
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        return ResponseEntity.ok(convertToDTO(user));
+        System.out.println("GET /api/auth/me called");
+        System.out.println("Authentication: " + (authentication != null ? authentication.getName() : "null"));
+        
+        if (authentication == null || !authentication.isAuthenticated()) {
+            System.out.println("Authentication failed - returning 401");
+            return ResponseEntity.status(401).body("Authentication required");
+        }
+        
+        try {
+            User user = userService.getUserByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+            System.out.println("User found: " + user.getUsername());
+            return ResponseEntity.ok(convertToDTO(user));
+        } catch (Exception e) {
+            System.out.println("Error getting user: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error retrieving user data");
+        }
     }
 
     private UserDTO convertToDTO(User user) {

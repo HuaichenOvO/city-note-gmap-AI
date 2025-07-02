@@ -1,12 +1,104 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { NoteType } from '../types/NoteType';
 import { ImageLoader } from './ImageLoader';
+import { eventApi } from '../api/eventApi';
+import { eventContext } from '../context/eventContext';
+import { EditEvent } from './EditEvent';
 
 export const NoteDetail = (props: {
   note: NoteType | null;
   onClickClose: () => void;
 }) => {
-  const [like, setLike] = useState<number>(50);
+  const [like, setLike] = useState<number>(props.note?.likes || 0);
+  const [canModify, setCanModify] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const { handler } = useContext(eventContext);
+
+  // Update local state when note data changes
+  useEffect(() => {
+    if (props.note) {
+      setLike(props.note.likes || 0);
+      checkUserPermissions();
+    }
+  }, [props.note]);
+
+  // Check user permissions for modifying this event
+  useEffect(() => {
+    if (props.note) {
+      checkUserPermissions();
+    }
+  }, [props.note]);
+
+  const checkUserPermissions = async () => {
+    if (!props.note) return;
+    
+    try {
+      console.log('Checking permissions for event:', props.note.noteId);
+      const hasPermission = await eventApi.canUserModifyEvent(props.note.noteId);
+      console.log('Permission check result:', hasPermission);
+      setCanModify(Boolean(hasPermission));
+    } catch (error) {
+      console.error('Failed to check user permissions:', error);
+      setCanModify(false);
+    }
+  };
+
+  const handleLike = async () => {
+    if (props.note) {
+      try {
+        console.log('Updating likes for note:', props.note.noteId);
+        const success = await eventApi.updateEventLikes(props.note.noteId);
+        console.log('API response:', success);
+        if (success) {
+          setLike(like + 1);
+          handler.refreshNotes();
+          console.log('Likes updated successfully');
+        }
+      } catch (error) {
+        console.error('Failed to update likes:', error);
+        setLike(like + 1);
+      }
+    }
+  };
+
+  const handleEdit = () => {
+    setShowEditForm(true);
+  };
+
+  const handleDelete = async () => {
+    if (!props.note) return;
+    
+    if (!confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      await eventApi.deleteEvent(props.note.noteId);
+      // 刷新notes列表
+      handler.refreshNotes();
+      // 关闭详情页面
+      props.onClickClose();
+    } catch (error) {
+      console.error('Failed to delete event:', error);
+      alert('Failed to delete event. Please try again.');
+    }
+  };
+
+  const handleEventUpdated = () => {
+    handler.refreshNotes();
+    setShowEditForm(false);
+  };
+
+  const getAuthorDisplayName = () => {
+    if (!props.note) return "";
+    if (props.note.authorFirstName && props.note.authorLastName) {
+      return `${props.note.authorFirstName} ${props.note.authorLastName}`;
+    } else if (props.note.authorFirstName) {
+      return props.note.authorFirstName;
+    } else {
+      return props.note.authorUsername;
+    }
+  };
 
   return (props.note &&
     <div className='relative bg-gray-200 rounded-lg shadow-lg 
@@ -31,6 +123,10 @@ export const NoteDetail = (props: {
       <div className='bg-gray-100 rounded-lg shadow-lg p-6'>
 
         <div className="text-2xl font-bold mb-2">{props.note.title}</div>
+
+        <div className="text-sm text-gray-600 mb-3">
+          <span className="font-medium">Posted by:</span> {getAuthorDisplayName()}
+        </div>
 
         <hr className="mb-3 bg-gray-800 mr-5"></hr>
 
@@ -59,15 +155,38 @@ export const NoteDetail = (props: {
 
 
         <div className='w-full mt-3 bg-gray-200 flex'>
-          <button className='flex'>
-            <img src="love.png" onClick={() => setLike(like + 1)}
-              className='bg-red-300 w-5 h-5 rounded-md
-                            hover:bg-red-500' />
-            : {like}
+          <button className='flex items-center space-x-2' onClick={handleLike}>
+            <img src="love.png" 
+              className='bg-red-300 w-5 h-5 rounded-md hover:bg-red-500 transition-colors duration-200' />
+            <span className="text-gray-700 font-medium">: {like}</span>
           </button>
+          
+          {canModify && (
+            <div className="ml-auto flex space-x-2">
+              <button
+                onClick={handleEdit}
+                className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200"
+              >
+                Edit
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-200"
+              >
+                Delete
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
+      {showEditForm && props.note && (
+        <EditEvent
+          note={props.note}
+          onClose={() => setShowEditForm(false)}
+          onEventUpdated={handleEventUpdated}
+        />
+      )}
     </div>
   );
 };
