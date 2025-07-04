@@ -23,7 +23,7 @@ export function Note(props: {
   return (
     <div
       className="bg-gray-50 p-4 rounded-lg shadow-sm hover:shadow-md 
-        transition-shadow duration-200 border border-gray-200"
+        transition-shadow duration-200 border border-gray-200 flex flex-col h-full"
     >
       <div className="flex justify-between items-start mb-2">
         <h3 className="text-lg font-semibold text-gray-700">
@@ -38,14 +38,16 @@ export function Note(props: {
         {props.note.content}
       </p>
 
-      <button
-        className="
-            mt-3 px-3 py-1 bg-indigo-500 text-white text-sm rounded-md 
-            hover:bg-indigo-700 transition-colors duration-200"
-        onClick={handleClick}
-      >
-        View Details
-      </button>
+      <div className="mt-auto pt-3">
+        <button
+          className="
+              px-3 py-1 bg-indigo-500 text-white text-sm rounded-md 
+              hover:bg-indigo-700 transition-colors duration-200"
+          onClick={handleClick}
+        >
+          View Details
+        </button>
+      </div>
     </div>
   );
 }

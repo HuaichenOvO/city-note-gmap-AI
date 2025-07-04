@@ -12,6 +12,7 @@ export const NoteDetail = (props: {
   const [like, setLike] = useState<number>(props.note?.likes || 0);
   const [canModify, setCanModify] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [isLikeLoading, setIsLikeLoading] = useState(false);
   const { handler } = useContext(eventContext);
 
   // Update local state when note data changes
@@ -44,19 +45,26 @@ export const NoteDetail = (props: {
   };
 
   const handleLike = async () => {
-    if (props.note) {
+    if (props.note && !isLikeLoading) {
+      setIsLikeLoading(true);
       try {
-        console.log('Updating likes for note:', props.note.noteId);
-        const success = await eventApi.updateEventLikes(props.note.noteId);
-        console.log('API response:', success);
-        if (success) {
+        console.log('Toggling like for note:', props.note.noteId);
+        const isLiked = await eventApi.toggleEventLike(props.note.noteId);
+        console.log('API response:', isLiked);
+        
+        // Update local state based on the response
+        if (isLiked) {
           setLike(like + 1);
-          handler.refreshNotes();
-          console.log('Likes updated successfully');
+        } else {
+          setLike(Math.max(0, like - 1));
         }
+        
+        handler.refreshNotes();
+        console.log('Like toggled successfully');
       } catch (error) {
-        console.error('Failed to update likes:', error);
-        setLike(like + 1);
+        console.error('Failed to toggle like:', error);
+      } finally {
+        setIsLikeLoading(false);
       }
     }
   };
@@ -155,10 +163,15 @@ export const NoteDetail = (props: {
 
 
         <div className='w-full mt-3 bg-gray-200 flex'>
-          <button className='flex items-center space-x-2' onClick={handleLike}>
+          <button 
+            className={`flex items-center space-x-2 ${isLikeLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-300'}`} 
+            onClick={handleLike}
+            disabled={isLikeLoading}
+          >
             <img src="love.png" 
               className='bg-red-300 w-5 h-5 rounded-md hover:bg-red-500 transition-colors duration-200' />
             <span className="text-gray-700 font-medium">: {like}</span>
+            {isLikeLoading && <span className="text-xs text-gray-500">...</span>}
           </button>
           
           {canModify && (

@@ -1,12 +1,15 @@
 import React, { useContext, useState, useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { eventContext } from './context/eventContext';
 
 import { NavBar } from './components/NavBar';
 import { NoteType } from './types/NoteType';
-import { NoteContainer } from './components/NoteContainer';
+import { ResizableSidebar } from './components/ResizableSidebar';
 import { MapComponent } from './components/MapComponent';
 import { NoteDetail } from './components/NoteDetail';
+import { CreateEvent } from './components/CreateEvent';
+import { UserProfilePage } from './components/UserProfile';
 import { GMAP_API_KEY, GMAP_MAP_ID } from '../env';
 import { CITY_JSON } from '../pj_config';
 import { eventApi } from './api/eventApi';
@@ -14,9 +17,10 @@ import { eventApi } from './api/eventApi';
 const MainPage: React.FC = () => {
   const [noteDetailDataState, setNoteDetailDataState] = useState<NoteType | null>(null);
   const [noteDetailVisibleState, setNoteDetailVisibleState] = useState<boolean>(false);
-  const [notePageVisibleState, setNotePageVisibleState] = useState<boolean>(true);
+  const [showCreateEvent, setShowCreateEvent] = useState<boolean>(false);
 
-  const { data } = useContext(eventContext);
+  const { data, handler } = useContext(eventContext);
+  const location = useLocation();
 
   // Update current event detail when event list is refreshed
   useEffect(() => {
@@ -31,62 +35,91 @@ const MainPage: React.FC = () => {
 
   const handleCountySelect = () => {
     setNoteDetailVisibleState(false);
-    setNotePageVisibleState(true);
+    setShowCreateEvent(false);
   };
 
   const handleMapDrag = () => {
     setNoteDetailVisibleState(false);
+    setShowCreateEvent(false);
   };
 
   const handleDetailPageClose = () => {
     setNoteDetailVisibleState(false);
   };
 
-  const handleSidePageClose = (toggleState: boolean) => {
-    setNoteDetailVisibleState(false);
-    setNotePageVisibleState(toggleState);
+  const handleCreateEventClose = () => {
+    setShowCreateEvent(false);
+  };
+
+  const handleEventCreated = () => {
+    if (data.countyId) {
+      handler.refreshNotes();
+    }
+    setShowCreateEvent(false);
   };
 
   // TODO: set default county name as user's located county or New York
   const handleNoteClick = (note: NoteType) => {
+    setShowCreateEvent(false); // Close create event modal
     setNoteDetailDataState(note);
     setNoteDetailVisibleState(true);
   };
 
-  return (
-    <>
-      <div className="h-1/20">
-        <NavBar />
-        <div className="text-xs text-gray-500 px-4 py-1">
-          County: {data.countyName} | Note: {noteDetailDataState?.title} | Detail visible: {noteDetailVisibleState} | Side page: {notePageVisibleState}
-        </div>
-      </div>
+  const handleShowCreateEvent = () => {
+    setNoteDetailVisibleState(false); // Close note detail modal
+    setShowCreateEvent(true);
+  };
 
-      <div className="relative flex flex-row w-full h-19/20 z-1">
-        {noteDetailVisibleState ? (
-          <div className="absolute left-1/2 top-1/2 overflow-visible w-1/4 transform -translate-y-1/2 z-10">
-            <NoteDetail {...{
-              note: noteDetailDataState,
-              onClickClose: handleDetailPageClose,
-            }} />
+  // Check if we're on the profile page
+  const isProfilePage = location.pathname === '/profile';
+
+  return (
+    <Routes>
+      <Route path="/profile" element={<UserProfilePage />} />
+      <Route path="/*" element={
+        <div className="flex flex-col h-screen">
+          <div className="flex-shrink-0">
+            <NavBar />
           </div>
-        ) : null}
-        <NoteContainer
-          visible={notePageVisibleState}
-          handleNoteClick={handleNoteClick}
-          handlePageClose={handleSidePageClose}
-        />
-        <div className='relative z-2 basis-full right-0 rounded-2xl bg-gray-100 p-2'>
-          <MapComponent
-            GMAP_API_KEY={GMAP_API_KEY}
-            GMAP_MAP_ID={GMAP_MAP_ID}
-            GEO_JSON_URL={CITY_JSON}
-            onCountySelect={handleCountySelect}
-            onBoundaryDrag={handleMapDrag}
-          />
+
+          {noteDetailVisibleState ? (
+            <div className="fixed left-1/2 top-1/2 overflow-visible w-1/4 transform -translate-x-1/2 -translate-y-1/2 z-50">
+              <NoteDetail {...{
+                note: noteDetailDataState,
+                onClickClose: handleDetailPageClose,
+              }} />
+            </div>
+          ) : null}
+          
+          {showCreateEvent && data.countyId && data.countyName ? (
+            <div className="fixed left-1/2 top-1/2 overflow-visible w-1/4 transform -translate-x-1/2 -translate-y-1/2 z-50">
+              <CreateEvent
+                countyId={data.countyId}
+                countyName={data.countyName}
+                onClose={handleCreateEventClose}
+                onEventCreated={handleEventCreated}
+              />
+            </div>
+          ) : null}
+
+          <div className="relative flex flex-row w-full flex-1 z-1">
+            <ResizableSidebar
+              handleNoteClick={handleNoteClick}
+              onShowCreateEvent={handleShowCreateEvent}
+            />
+            <div className='relative z-2 basis-full right-0 rounded-2xl bg-gray-100 p-2'>
+              <MapComponent
+                GMAP_API_KEY={GMAP_API_KEY}
+                GMAP_MAP_ID={GMAP_MAP_ID}
+                GEO_JSON_URL={CITY_JSON}
+                onCountySelect={handleCountySelect}
+                onBoundaryDrag={handleMapDrag}
+              />
+            </div>
+          </div>
         </div>
-      </div>
-    </>
+      } />
+    </Routes>
   );
 };
 

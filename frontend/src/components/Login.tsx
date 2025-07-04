@@ -1,25 +1,24 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { authApi } from '../api/authApi';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/authContext';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     try {
       console.log('Attempting login with:', { username, password: '***' });
-      const response = await authApi.login({ username, password });
-      console.log('Login successful:', response);
-      console.log('Token saved:', localStorage.getItem('token'));
+      await login(username, password);
+      console.log('Login successful');
       
-      // Add a small delay to ensure token is saved
-      setTimeout(() => {
-        window.location.replace('/');
-      }, 100);
+      // Navigate to home page
+      navigate('/');
     } catch (err) {
       console.error('Login failed:', err);
       setError('Invalid username or password');
