@@ -5,6 +5,7 @@ import com.citynote.dto.EventResponseDTO;
 import com.citynote.entity.BlobEntity;
 import com.citynote.entity.CountyEntity;
 import com.citynote.entity.EventEntity;
+import com.citynote.entity.EventLikeEntity;
 import com.citynote.entity.UserProfile;
 import com.citynote.entity.enums.EventType;
 import com.citynote.repository.*;
@@ -31,16 +32,19 @@ public class RdbEventServImpl implements EventService {
     private final BlobRepository blobRepository;
     private final UserProfileRepository userProfileRepository;
     private final CountyRepository countyRepository;
+    private final EventLikeRepository eventLikeRepository;
 
     @Autowired
     public RdbEventServImpl(EventRepository eventRepository,
                             BlobRepository blobRepository,
                             UserProfileRepository userProfileRepository,
-                            CountyRepository countyRepository) {
+                            CountyRepository countyRepository,
+                            EventLikeRepository eventLikeRepository) {
         this.eventRepository = eventRepository;
         this.blobRepository = blobRepository;
         this.userProfileRepository = userProfileRepository;
         this.countyRepository = countyRepository;
+        this.eventLikeRepository = eventLikeRepository;
     }
 
     public Optional<EventResponseDTO> getEventById(int id){
@@ -63,6 +67,28 @@ public class RdbEventServImpl implements EventService {
         return eventRepository
                 .findByUserProfile_Id(userProfileId, pageable)
                 .map(this::DTOConverter);
+    }
+
+    @Transactional
+    public Page<EventResponseDTO> getPagesOfCurrentUserEvents(Pageable pageable){
+        // Get current authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || 
+            "anonymousUser".equals(authentication.getName())) {
+            throw new RuntimeException("Authentication required. Please login first.");
+        }
+        
+        String currentUsername = authentication.getName();
+        
+        // Find user profile by username
+        Optional<UserProfile> userProfileOpt = userProfileRepository.findByUsername(currentUsername);
+        if (userProfileOpt.isPresent()) {
+            return eventRepository
+                    .findByUserProfile_Id(userProfileOpt.get().getId(), pageable)
+                    .map(this::DTOConverter);
+        } else {
+            throw new RuntimeException("User profile not found for username: " + currentUsername);
+        }
     }
 
     @Transactional
@@ -178,15 +204,77 @@ public class RdbEventServImpl implements EventService {
     }
 
     @Transactional
-    public Boolean incrementEventLikes(int eventId) {
-        Optional<EventEntity> eventOptional = eventRepository.findById(eventId);
-        if (eventOptional.isPresent()) {
-            EventEntity event = eventOptional.get();
-            event.setLikes(event.getLikes() + 1);
-            eventRepository.save(event);
-            return true;
+    public Boolean toggleEventLike(int eventId) {
+        // Get current user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("Authentication required");
         }
-        return false;
+        
+        String currentUsername = authentication.getName();
+        Optional<UserProfile> userProfileOpt = userProfileRepository.findByUsername(currentUsername);
+        if (userProfileOpt.isEmpty()) {
+            throw new RuntimeException("User profile not found");
+        }
+        
+        UserProfile userProfile = userProfileOpt.get();
+        
+        // Check if event exists first
+        Optional<EventEntity> eventOptional = eventRepository.findById(eventId);
+        if (eventOptional.isEmpty()) {
+            return false;
+        }
+        
+        EventEntity event = eventOptional.get();
+        
+        // Use a more robust approach to handle concurrent requests
+        // First, try to find existing like
+        Optional<EventLikeEntity> existingLike = eventLikeRepository.findByEventIdAndUserProfileId(eventId, userProfile.getId());
+        
+        if (existingLike.isPresent()) {
+            // User already liked, so unlike
+            EventLikeEntity likeToDelete = existingLike.get();
+            eventLikeRepository.delete(likeToDelete);
+            
+            // Update event likes count atomically
+            event.setLikes(Math.max(0, event.getLikes() - 1));
+            eventRepository.save(event);
+            System.out.println("User " + currentUsername + " unliked event " + eventId);
+            return false; // Return false to indicate unliked
+        } else {
+            // User hasn't liked, so like
+            try {
+                // Create new like
+                EventLikeEntity newLike = new EventLikeEntity();
+                newLike.setEvent(event);
+                newLike.setUserProfile(userProfile);
+                eventLikeRepository.save(newLike);
+                
+                // Update event likes count
+                event.setLikes(event.getLikes() + 1);
+                eventRepository.save(event);
+                System.out.println("User " + currentUsername + " liked event " + eventId);
+                return true; // Return true to indicate liked
+            } catch (Exception e) {
+                // Handle potential unique constraint violation
+                System.out.println("Error creating like, might be duplicate: " + e.getMessage());
+                // Check if like was actually created despite the exception
+                Optional<EventLikeEntity> checkLike = eventLikeRepository.findByEventIdAndUserProfileId(eventId, userProfile.getId());
+                if (checkLike.isPresent()) {
+                    // Like was created, update count
+                    event.setLikes(event.getLikes() + 1);
+                    eventRepository.save(event);
+                    return true;
+                }
+                return false;
+            }
+        }
+    }
+
+    @Override
+    public Boolean incrementEventLikes(int eventId) {
+        // For backward compatibility, just call toggleEventLike
+        return toggleEventLike(eventId);
     }
 
     /**

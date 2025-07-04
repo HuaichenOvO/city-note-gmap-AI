@@ -35,16 +35,23 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         
         System.out.println("JWT Filter - URI: " + requestURI + ", Method: " + method);
         
-        // Allow login and register endpoints only
+        // Allow login and register endpoints only (no JWT required)
         if (requestURI.equals("/api/auth/login") || requestURI.equals("/api/auth/register")) {
             System.out.println("Allowing auth endpoint: " + requestURI);
             chain.doFilter(request, response);
             return;
         }
         
-        // Allow GET requests to event endpoints (but not can-modify)
-        if (requestURI.startsWith("/api/event/") && method.equals("GET") && !requestURI.contains("/can-modify")) {
-            System.out.println("Allowing GET event endpoint: " + requestURI);
+        // For /api/auth/me, we need to check JWT but not block if missing
+        if (requestURI.equals("/api/auth/me")) {
+            System.out.println("Processing /api/auth/me endpoint");
+            // Continue to JWT processing below
+        }
+        
+        // Allow GET requests to public event endpoints (but not user-specific or can-modify)
+        if (requestURI.startsWith("/api/event/") && method.equals("GET") && 
+            !requestURI.contains("/can-modify") && !requestURI.contains("/user/")) {
+            System.out.println("Allowing public GET event endpoint: " + requestURI);
             chain.doFilter(request, response);
             return;
         }

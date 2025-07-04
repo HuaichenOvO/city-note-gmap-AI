@@ -50,6 +50,15 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
+    @GetMapping("/user/me")
+    public ResponseEntity<Page<EventResponseDTO>> getCurrentUserEvents(
+            @RequestParam int page,
+            @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<EventResponseDTO> events = eventService.getPagesOfCurrentUserEvents(pageable);
+        return ResponseEntity.ok(events);
+    }
+
     @PutMapping("/{id}")
     // Pre authorize
     public ResponseEntity<Integer> updateEvent(@PathVariable int id, @RequestBody EventRequestDTO eventRequestDTO) {
@@ -81,9 +90,9 @@ public class EventController {
     }
 
     @PutMapping("/{id}/like")
-    public ResponseEntity<Boolean> updateEventLikes(@PathVariable int id) {
+    public ResponseEntity<Boolean> toggleEventLike(@PathVariable int id) {
         return eventService.getEventById(id)
-                .map(evt -> ResponseEntity.ok(eventService.incrementEventLikes(id)))
+                .map(evt -> ResponseEntity.ok(eventService.toggleEventLike(id)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
