@@ -4,19 +4,18 @@ import React, { useState, useContext } from 'react';
 import { NoteType } from '../types/NoteType';
 import { Note } from './Note';
 import { LoadingNote } from './LoadingNote';
-import { CreateEvent } from './CreateEvent';
 import { eventContext } from '../context/eventContext';
 
 type NoteContainerProps = {
   visible: boolean;
   handleNoteClick: (noteObj: NoteType) => void;
   handlePageClose: (pageState: boolean) => void;
+  onShowCreateEvent: () => void;
 };
 
 export const NoteContainer = (props: NoteContainerProps) => {
 
   const { data, handler } = useContext(eventContext);
-  const [showCreateEvent, setShowCreateEvent] = useState(false);
 
   const handleHideButtonClick = (pageState: boolean) => {
     props.handlePageClose(pageState);
@@ -62,7 +61,7 @@ export const NoteContainer = (props: NoteContainerProps) => {
               </h2>
               {data.countyName && (
                 <button
-                  onClick={() => setShowCreateEvent(true)}
+                  onClick={props.onShowCreateEvent}
                   className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200"
                 >
                   + Create Event
@@ -106,15 +105,6 @@ export const NoteContainer = (props: NoteContainerProps) => {
             </div>
           </div>
         </div>
-
-        {showCreateEvent && data.countyId && data.countyName && (
-          <CreateEvent
-            countyId={data.countyId}
-            countyName={data.countyName}
-            onClose={() => setShowCreateEvent(false)}
-            onEventCreated={handleEventCreated}
-          />
-        )}
       </>
     );
   }

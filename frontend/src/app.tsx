@@ -18,6 +18,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import { EventContextProvider } from './context/eventContext'
+import { AuthProvider } from './context/authContext'
 
 import MainPage from './MainPage';
 import Login from './components/Login';
@@ -26,15 +27,17 @@ import PrivateRoute from './components/PrivateRoute';
 
 const App: React.FC = () => (
   <BrowserRouter>
-    <EventContextProvider>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route element={<PrivateRoute />}>
-          <Route path="/*" element={<MainPage />} />
-        </Route>
-      </Routes>
-    </EventContextProvider>
+    <AuthProvider>
+      <EventContextProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route element={<PrivateRoute />}>
+            <Route path="/*" element={<MainPage />} />
+          </Route>
+        </Routes>
+      </EventContextProvider>
+    </AuthProvider>
   </BrowserRouter>
 );
 

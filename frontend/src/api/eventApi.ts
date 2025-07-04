@@ -37,7 +37,7 @@ export const eventApi = {
         }
     },
     getEventsByUser: async (userId: string) => {
-        const response = await api.get<NoteType[]>(`event/county/${userId}`);
+        const response = await api.get<NoteType[]>(`event/user/${userId}`);
         return response.data;
     },
     updateEvent: async (noteId: string, note: CreateEventType) => {
@@ -48,7 +48,7 @@ export const eventApi = {
         const response = await api.delete(`event/${noteId}`);
         return response.data;
     },
-    updateEventLikes: async (noteId: string) => {
+    toggleEventLike: async (noteId: string) => {
         const response = await api.put(`event/${noteId}/like`);
         return response.data;
     },

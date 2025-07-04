@@ -86,18 +86,28 @@ export const EditEvent: React.FC<EditEventProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="relative bg-gray-200 rounded-lg shadow-lg px-4 py-6 z-0 inline-block max-w-2xl">
+      <button
+        onClick={onClose}
+        className="
+          absolute z-1 right-0 top-0
+          mx-3 my-3 px-2 py-2
+          bg-indigo-400 text-white font-semibold
+          rounded-l-full rounded-r-full shadow-lg
+          hover:bg-indigo-600
+          focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75
+          transition-all duration-300 ease-in-out
+          whitespace-nowrap              
+        "
+      >
+        <img src="close.png" className="h-5 w-5" />
+      </button>
+
+      <div className="bg-gray-100 rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto max-w-2xl">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-gray-800">
-            Edit Event
+            Edit Event in {note.county}
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl"
-          >
-            ×
-          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
