@@ -69,26 +69,4 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
-
-    @Override
-    public void ensureAllUsersHaveProfile() {
-        List<User> users = userRepository.findAll();
-        int createdCount = 0;
-        
-        for (User user : users) {
-            if (userProfileRepository.findByUsername(user.getUsername()).isEmpty()) {
-                UserProfile profile = new UserProfile();
-                profile.setUser(user);
-                userProfileRepository.save(profile);
-                createdCount++;
-                System.out.println("Created UserProfile for user: " + user.getUsername());
-            }
-        }
-        
-        if (createdCount > 0) {
-            System.out.println("Created " + createdCount + " UserProfile(s) for existing users");
-        } else {
-            System.out.println("All users already have UserProfile");
-        }
-    }
 } 

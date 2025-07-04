@@ -19,6 +19,9 @@ public interface EventService {
     // a list of user-posted history
     Page<EventResponseDTO> getPagesOfUserPostedEvents(Long userId, Pageable pageable);
 
+    // a list of current user's posted events
+    Page<EventResponseDTO> getPagesOfCurrentUserEvents(Pageable pageable);
+
     // return new event's ID
     int postEvent(EventRequestDTO eventRequestDTO);
 
@@ -28,7 +31,10 @@ public interface EventService {
     // true if successfully deleted
     Boolean deleteEvent(int eventId);
 
-    // increment likes count for an event
+    // toggle like for an event (like/unlike)
+    Boolean toggleEventLike(int eventId);
+
+    // increment likes count for an event (for backward compatibility)
     Boolean incrementEventLikes(int eventId);
 
     // check if current user can modify an event
