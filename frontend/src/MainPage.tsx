@@ -58,17 +58,19 @@ const MainPage: React.FC = () => {
     setShowCreateEvent(false);
   };
 
+  const handleShowCreateEvent = () => {
+    setNoteDetailVisibleState(false);
+    setShowCreateEvent(true);
+  };
+
   // TODO: set default county name as user's located county or New York
   const handleNoteClick = (note: NoteType) => {
-    setShowCreateEvent(false); // Close create event modal
+    setShowCreateEvent(false);
     setNoteDetailDataState(note);
     setNoteDetailVisibleState(true);
   };
 
-  const handleShowCreateEvent = () => {
-    setNoteDetailVisibleState(false); // Close note detail modal
-    setShowCreateEvent(true);
-  };
+
 
   // Check if we're on the profile page
   const isProfilePage = location.pathname === '/profile';
@@ -92,14 +94,12 @@ const MainPage: React.FC = () => {
           ) : null}
           
           {showCreateEvent && data.countyId && data.countyName ? (
-            <div className="fixed left-1/2 top-1/2 overflow-visible w-1/4 transform -translate-x-1/2 -translate-y-1/2 z-50">
-              <CreateEvent
-                countyId={data.countyId}
-                countyName={data.countyName}
-                onClose={handleCreateEventClose}
-                onEventCreated={handleEventCreated}
-              />
-            </div>
+            <CreateEvent
+              countyId={data.countyId}
+              countyName={data.countyName}
+              onClose={handleCreateEventClose}
+              onEventCreated={handleEventCreated}
+            />
           ) : null}
 
           <div className="relative flex flex-row w-full flex-1 z-1">
