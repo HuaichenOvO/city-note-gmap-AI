@@ -7,6 +7,7 @@ export type NoteType = {
     videoLink?: string | null;
     date: Date;
     county: string;
+    countyId?: number;  
     eventType: string;
     likes: number;
     authorUsername: string;

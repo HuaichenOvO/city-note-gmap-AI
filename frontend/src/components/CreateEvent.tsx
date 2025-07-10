@@ -51,7 +51,7 @@ export const CreateEvent: React.FC<CreateEventProps> = ({
         eventType,
         pictureLinks: eventType === 'IMAGE' ? pictureLinks.filter(link => link.trim()) : [],
         videoLink: eventType === 'VIDEO' ? videoLink.trim() : null,
-        countyId: countyId ? parseInt(countyId) : 1001
+        countyId: parseInt(countyId)  
       };
 
       await eventApi.createEvent(eventData);

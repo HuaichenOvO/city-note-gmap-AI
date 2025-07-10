@@ -1,4 +1,5 @@
 import api from "./config";
+import { PAGINATION_CONFIG } from '../../pj_config';
 
 import { NoteType, CreateEventType } from '../types/NoteType';
 
@@ -9,7 +10,7 @@ export const eventApi = {
     },
     getEventsByCounty: async (countyId: string) => {
         // TODO: add page flipping
-        const response = await api.get<any>(`event/county/${countyId}?page=0&size=10`);
+        const response = await api.get<any>(`event/county/${countyId}?page=${PAGINATION_CONFIG.defaultPage}&size=${PAGINATION_CONFIG.defaultPageSize}`);
         console.log("[eventApi.getEventsByCounty]", response.data);
 
         if (response.data && !response.data.empty) {
@@ -22,6 +23,7 @@ export const eventApi = {
                     videoLink: i.videoLink,
                     date: new Date(i.date),
                     county: i.county,
+                    countyId: i.countyId,  
                     eventType: i.eventType,
                     likes: i.likes || 0,
                     authorUsername: i.authorUsername || "Unknown User",

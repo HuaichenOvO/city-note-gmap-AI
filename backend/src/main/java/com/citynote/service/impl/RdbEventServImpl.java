@@ -120,26 +120,29 @@ public class RdbEventServImpl implements EventService {
         
         // Set county - get countyId from EventRequestDTO
         if (eventRequestDTO.getCountyId() != null) {
+            // Try to find county with the provided ID first
             Optional<CountyEntity> countyOpt = countyRepository.findById(eventRequestDTO.getCountyId());
             if (countyOpt.isPresent()) {
                 eventEntity.setCounty(countyOpt.get());
             } else {
-                // Use default county if not found
-                Optional<CountyEntity> defaultCountyOpt = countyRepository.findById(1013); // Butler County, Alabama
-                if (defaultCountyOpt.isPresent()) {
-                    eventEntity.setCounty(defaultCountyOpt.get());
+                // If not found, try to find by converting the ID format
+                // Frontend sends countyId like 6085, but database might have 06085
+                Integer convertedCountyId = convertCountyIdFormat(eventRequestDTO.getCountyId());
+                if (convertedCountyId != null) {
+                    Optional<CountyEntity> convertedCountyOpt = countyRepository.findById(convertedCountyId);
+                    if (convertedCountyOpt.isPresent()) {
+                        eventEntity.setCounty(convertedCountyOpt.get());
+                    } else {
+                        throw new RuntimeException("County with ID " + eventRequestDTO.getCountyId() + " (converted: " + convertedCountyId + ") not found");
+                    }
                 } else {
-                    throw new RuntimeException("Default county not found");
+                    throw new RuntimeException("County with ID " + eventRequestDTO.getCountyId() + " not found");
                 }
             }
         } else {
-            // Use default county if no countyId provided
-            Optional<CountyEntity> defaultCountyOpt = countyRepository.findById(1013); // Butler County, Alabama
-            if (defaultCountyOpt.isPresent()) {
-                eventEntity.setCounty(defaultCountyOpt.get());
-            } else {
-                throw new RuntimeException("Default county not found");
-            }
+            // If no countyId provided, we need to handle this case
+            // For now, throw an error to make it explicit that countyId is required
+            throw new RuntimeException("County ID is required for creating an event");
         }
         
         if (eventRequestDTO.getPictureLinks().length > 0) {
@@ -370,5 +373,54 @@ public class RdbEventServImpl implements EventService {
         eventResponseDTO.setEventType(e.getEventType());
         return eventResponseDTO;
     }
-
+    
+    /**
+     * Convert county ID from frontend format to database format
+     * Frontend sends countyId like 6085, but database might have 06085
+     * This method tries different format conversions
+     */
+    private Integer convertCountyIdFormat(Integer countyId) {
+        if (countyId == null) {
+            return null;
+        }
+        
+        String countyIdStr = countyId.toString();
+        
+        // If it's already 5 digits, return as is
+        if (countyIdStr.length() == 5) {
+            return countyId;
+        }
+        
+        // If it's 4 digits, try adding leading zero
+        if (countyIdStr.length() == 4) {
+            String convertedStr = "0" + countyIdStr;
+            try {
+                Integer convertedId = Integer.parseInt(convertedStr);
+                // Check if this converted ID exists in the database
+                Optional<CountyEntity> countyOpt = countyRepository.findById(convertedId);
+                if (countyOpt.isPresent()) {
+                    return convertedId;
+                }
+            } catch (NumberFormatException e) {
+                // Ignore and continue to next conversion
+            }
+        }
+        
+        // If it's 3 digits, try adding two leading zeros
+        if (countyIdStr.length() == 3) {
+            String convertedStr = "00" + countyIdStr;
+            try {
+                Integer convertedId = Integer.parseInt(convertedStr);
+                // Check if this converted ID exists in the database
+                Optional<CountyEntity> countyOpt = countyRepository.findById(convertedId);
+                if (countyOpt.isPresent()) {
+                    return convertedId;
+                }
+            } catch (NumberFormatException e) {
+                // Ignore and continue to next conversion
+            }
+        }
+        
+        return null;
+    }
 }
