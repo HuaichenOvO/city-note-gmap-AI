@@ -44,7 +44,7 @@ export const EditEvent: React.FC<EditEventProps> = ({
         eventType,
         pictureLinks: eventType === 'IMAGE' ? pictureLinks.filter(link => link.trim()) : [],
         videoLink: eventType === 'VIDEO' ? videoLink.trim() : null,
-        countyId: 1001 // Use default countyId
+        countyId: note.countyId || 0  // Use the original event's countyId if available
       };
 
       await eventApi.updateEvent(note.noteId, eventData);

@@ -7,6 +7,7 @@ import {
 } from '@vis.gl/react-google-maps';
 
 import { eventContext } from '../context/eventContext';
+import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '../../pj_config';
 
 import Clickableboundry from './Clickableboundry';
 import SearchBar from './SearchBar';
@@ -41,8 +42,8 @@ export const MapComponent: React.FC<MapProps> = (props: MapProps) => {
       libraries={['places', 'drawing']}
     >
       <Map
-        defaultZoom={7}
-        defaultCenter={{ lat: 37.33548, lng: -121.893028 }}
+        defaultZoom={DEFAULT_MAP_ZOOM}
+        defaultCenter={DEFAULT_MAP_CENTER}
         // onCameraChanged={(ev: MapCameraChangedEvent) => {
         //   console.log(
         //     `camera changed: ${ev.detail.center} zoom: ${ev.detail.zoom}`,
