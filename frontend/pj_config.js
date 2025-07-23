@@ -2,8 +2,8 @@ export const CITY_JSON = "counties.json";
 
 // Default map center coordinates (US geographic center)
 export const DEFAULT_MAP_CENTER = {
-  lat: 39.8283,  // US geographic center latitude
-  lng: -98.5795  // US geographic center longitude
+  lat: 37.3541,    // Santa Clara County latitude
+  lng: -121.9552   // Santa Clara County longitude
 };
 
 // Default zoom level

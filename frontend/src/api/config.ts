@@ -9,7 +9,7 @@ const api = axios.create({
   },
 });
 
-// 请求拦截器
+// Request interceptor
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -24,12 +24,12 @@ api.interceptors.request.use(
   }
 );
 
-// 响应拦截器
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // 处理未授权错误
+      // Handle unauthorized error
       localStorage.removeItem('token');
       window.location.href = '/login';
     }

@@ -35,6 +35,8 @@ public class SecurityConfig {
                 .requestMatchers("GET", "/api/event/user/**").permitAll()
                 .requestMatchers("/api/event/**").authenticated()
                 .requestMatchers("/api/user/**").permitAll()
+                .requestMatchers("GET", "/api/upload/image/**").permitAll()
+                .requestMatchers("POST", "/api/upload/image").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session

@@ -95,27 +95,91 @@ public class AuthController {
     }
 }
 
-@Data
 class LoginRequest {
     private String username;
     private String password;
+
+    // Manual getters and setters for Lombok compatibility
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
 
-@Data
 class RegisterRequest {
     private String username;
     private String email;
     private String password;
     private String confirmPassword;
+
+    // Manual getters and setters for Lombok compatibility
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getConfirmPassword() {
+        return confirmPassword;
+    }
+
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
+    }
 }
 
-@Data
 class AuthResponse {
     private String token;
     private UserDTO user;
 
     public AuthResponse(String token, UserDTO user) {
         this.token = token;
+        this.user = user;
+    }
+
+    // Manual getters and setters for Lombok compatibility
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public UserDTO getUser() {
+        return user;
+    }
+
+    public void setUser(UserDTO user) {
         this.user = user;
     }
 } 

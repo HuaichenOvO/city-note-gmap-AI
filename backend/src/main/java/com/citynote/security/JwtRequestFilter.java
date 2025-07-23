@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import org.springframework.lang.NonNull;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -26,8 +27,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+        @NonNull HttpServletRequest request,
+        @NonNull HttpServletResponse response,
+        @NonNull FilterChain chain
+    ) throws ServletException, IOException {
 
         // Skip JWT validation for public endpoints
         String requestURI = request.getRequestURI();
@@ -38,6 +42,20 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         // Allow login and register endpoints only (no JWT required)
         if (requestURI.equals("/api/auth/login") || requestURI.equals("/api/auth/register")) {
             System.out.println("Allowing auth endpoint: " + requestURI);
+            chain.doFilter(request, response);
+            return;
+        }
+        
+        // Allow file upload endpoints (no JWT required)
+        if (requestURI.equals("/api/upload/image") && method.equals("POST")) {
+            System.out.println("Allowing file upload endpoint: " + requestURI);
+            chain.doFilter(request, response);
+            return;
+        }
+        
+        // Allow GET requests to image files (no JWT required)
+        if (requestURI.startsWith("/api/upload/image/") && method.equals("GET")) {
+            System.out.println("Allowing image access endpoint: " + requestURI);
             chain.doFilter(request, response);
             return;
         }
