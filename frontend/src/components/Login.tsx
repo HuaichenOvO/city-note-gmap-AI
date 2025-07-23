@@ -27,7 +27,7 @@ const Login: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto mt-24 p-6 border border-gray-200 rounded-lg shadow-sm">
-      <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">City Note</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Username:</label>

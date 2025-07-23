@@ -22,6 +22,14 @@ const MainPage: React.FC = () => {
   const { data, handler } = useContext(eventContext);
   const location = useLocation();
 
+  // Check if location.state requires showing Create Event modal
+  useEffect(() => {
+    if (location.state && location.state.showCreateEvent) {
+      setShowCreateEvent(true);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
   // Update current event detail when event list is refreshed
   useEffect(() => {
     if (noteDetailDataState && noteDetailVisibleState) {
@@ -85,7 +93,7 @@ const MainPage: React.FC = () => {
           </div>
 
           {noteDetailVisibleState ? (
-            <div className="fixed left-1/2 top-1/2 overflow-visible w-1/4 transform -translate-x-1/2 -translate-y-1/2 z-50">
+            <div className="fixed left-1/2 top-1/2 overflow-visible w-1/4 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-transparent border-none">
               <NoteDetail {...{
                 note: noteDetailDataState,
                 onClickClose: handleDetailPageClose,

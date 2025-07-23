@@ -25,4 +25,28 @@ public class UserProfile {
     )
     private List<EventEntity> events;
 
+    // Manual getters and setters for Lombok compatibility
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public List<EventEntity> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<EventEntity> events) {
+        this.events = events;
+    }
 }

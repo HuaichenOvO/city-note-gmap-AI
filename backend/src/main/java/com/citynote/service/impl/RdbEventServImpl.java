@@ -22,7 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.io.File;
 
 @Service
 @Qualifier("RdbEventServiceImpl")
@@ -34,7 +36,6 @@ public class RdbEventServImpl implements EventService {
     private final CountyRepository countyRepository;
     private final EventLikeRepository eventLikeRepository;
 
-    @Autowired
     public RdbEventServImpl(EventRepository eventRepository,
                             BlobRepository blobRepository,
                             UserProfileRepository userProfileRepository,
@@ -148,24 +149,13 @@ public class RdbEventServImpl implements EventService {
         if (eventRequestDTO.getPictureLinks().length > 0) {
             eventEntity.setEventType(EventType.IMAGE);
             for (int i = 0; i < eventRequestDTO.getPictureLinks().length; i++) {
-                String link = eventRequestDTO.getPictureLinks()[i];
+                String filename = eventRequestDTO.getPictureLinks()[i];
                 BlobEntity blobEntity = new BlobEntity();
-                // TODO: let the s3 service add the blobs to the repository
-                blobEntity.setS3Key(link.length() > 5 ? link : "s3s3s");
-                blobEntity.setS3Link(link);
+                blobEntity.setFilename(filename);
                 blobEntity.setInPlaceOrder(i+1);
                 blobEntity.setEvent(eventEntity);
                 blobRepository.save(blobEntity);
             }
-        }
-        else if (eventRequestDTO.getVideoLink() != null) {
-            eventEntity.setEventType(EventType.VIDEO);
-            BlobEntity blobEntity = new BlobEntity();
-            String link = eventRequestDTO.getVideoLink();
-            blobEntity.setS3Link(link);
-            blobEntity.setS3Key(link.length() > 5 ? link : "s3s3s");
-            blobEntity.setInPlaceOrder(0);
-            blobEntity.setEvent(eventEntity);
         }
         else {
             eventEntity.setEventType(EventType.TEXT);
@@ -180,19 +170,44 @@ public class RdbEventServImpl implements EventService {
         // 2. data validation
         // 3. fetch object
         // 4. update entity and save it
-        // TODO: update links and type
-
-        // 5. return
-        return eventRepository.findById(eventId)
-                .map(eE -> {
-                    eE.setTitle(eventRequestDTO.getTitle());
-                    eE.setContent(eventRequestDTO.getContent());
-                    eE.setLastUpdateDate(LocalDateTime.now());
-                    eventRepository.save(eE);
-                    // TODO: update links and type
-                    return 1;
-                })
-                .orElse(-1);
+        
+        Optional<EventEntity> eventOpt = eventRepository.findById(eventId);
+        if (eventOpt.isEmpty()) {
+            return -1;
+        }
+        
+        EventEntity eventEntity = eventOpt.get();
+        
+        // Update basic fields
+        eventEntity.setTitle(eventRequestDTO.getTitle());
+        eventEntity.setContent(eventRequestDTO.getContent());
+        eventEntity.setLastUpdateDate(LocalDateTime.now());
+        
+        // 先保存event的更新
+        eventEntity = eventRepository.save(eventEntity);
+        
+        // 使用JPQL直接删除blobs，避免级联问题
+        blobRepository.deleteByEventId(eventId);
+        
+        // Update event type and blobs based on content
+        if (eventRequestDTO.getPictureLinks() != null && eventRequestDTO.getPictureLinks().length > 0) {
+            eventEntity.setEventType(EventType.IMAGE);
+            for (int i = 0; i < eventRequestDTO.getPictureLinks().length; i++) {
+                String filename = eventRequestDTO.getPictureLinks()[i];
+                BlobEntity blobEntity = new BlobEntity();
+                blobEntity.setFilename(filename);
+                blobEntity.setInPlaceOrder(i+1);
+                blobEntity.setEvent(eventEntity);
+                blobRepository.save(blobEntity);
+            }
+        }
+        else {
+            eventEntity.setEventType(EventType.TEXT);
+        }
+        
+        // 最后再次保存event
+        eventRepository.save(eventEntity);
+        return 1;
     }
 
     @Transactional
@@ -200,7 +215,27 @@ public class RdbEventServImpl implements EventService {
         // if no related data in DB, there will be no errors
         Optional<EventEntity> eOptional = eventRepository.findById(eventId);
         if (eOptional.isPresent()) {
-            eventRepository.delete(eOptional.get());
+            EventEntity event = eOptional.get();
+            // 删除本地图片文件
+            try {
+                List<BlobEntity> blobs = blobRepository.findBlobEntitiesByEvent(event);
+                String uploadDir = System.getProperty("user.dir") + File.separator + "uploads";
+                for (BlobEntity blob : blobs) {
+                    String filename = blob.getFilename();
+                    if (filename != null) {
+                        File file = new File(uploadDir, filename);
+                        if (file.exists()) {
+                            boolean deleted = file.delete();
+                            System.out.println("[deleteEvent] Deleted image file: " + file.getAbsolutePath() + " success: " + deleted);
+                        } else {
+                            System.out.println("[deleteEvent] Image file not found: " + file.getAbsolutePath());
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                System.err.println("[deleteEvent] Error deleting image files: " + ex.getMessage());
+            }
+            eventRepository.delete(event);
             return true;
         }
         return false;
@@ -353,17 +388,10 @@ public class RdbEventServImpl implements EventService {
             String[] pictureLinks = e.getBlobs()
                     .stream()
                     .sorted((u1, u2) -> u1.getInPlaceOrder() - u2.getInPlaceOrder())
-                    .map(BlobEntity::getS3Link)
+                    .map(BlobEntity::getFilename)
                     .toArray(String[]::new);
             eventResponseDTO.setPictureLinks(pictureLinks);
             eventResponseDTO.setVideoLink("");
-        }
-        else if (e.getEventType() == EventType.VIDEO) {
-            String videoLink = e.getBlobs()
-                    .get(0)
-                    .getS3Link();
-            eventResponseDTO.setPictureLinks(new String[0]);
-            eventResponseDTO.setVideoLink(videoLink);
         }
         else {
             eventResponseDTO.setPictureLinks(new String[0]);

@@ -22,7 +22,7 @@ export const NoteContainer = (props: NoteContainerProps) => {
   };
 
   const handleEventCreated = () => {
-    // 刷新事件列表
+    // Refresh event list
     if (data.countyId) {
       handler.refreshNotes();
     }
