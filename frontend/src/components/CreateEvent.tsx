@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { eventApi } from '../api/eventApi';
 import { CreateEventType } from '../types/NoteType';
+import { textGenAptApi } from '../api/textGenApi';
 
 interface CreateEventProps {
   countyId: string | null;
@@ -21,6 +22,9 @@ export const CreateEvent: React.FC<CreateEventProps> = ({
   const [pictureLinks, setPictureLinks] = useState<string[]>(['']);
   const [videoLink, setVideoLink] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRecTextDisplayed, setIsRecTextDisplayed] = useState(false);
+  const [recTitle, setRecTitle] = useState('');
+  const [recContent, setRecContent] = useState('');
 
   // 如果countyId或countyName为空，不渲染组件
   if (!countyId || !countyName) {
@@ -87,6 +91,21 @@ export const CreateEvent: React.FC<CreateEventProps> = ({
     }
   };
 
+  const recommendText = () => {
+    setRecTitle('');
+    setRecContent('');
+    setIsRecTextDisplayed(true);
+    textGenAptApi.genText(title, content)
+      .then(response => {
+        setRecTitle(response.newTitle);
+        setRecContent(response.newContent);
+      })
+      .catch(error => {
+        console.error("Error generating text:", error);
+        alert("Failed to generate text. Please try again.");
+      });
+  }
+
   const addPictureLink = () => {
     setPictureLinks([...pictureLinks, '']);
   };
@@ -103,7 +122,7 @@ export const CreateEvent: React.FC<CreateEventProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="absolute bg-white rounded-lg p-6 top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-gray-800">
             Create New Event in {countyName}
@@ -212,22 +231,77 @@ export const CreateEvent: React.FC<CreateEventProps> = ({
 
           <div className="flex gap-4 pt-4">
             <button
+                type="button"
+                onClick={recommendText}
+                className="flex-1 bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-800"
+              > ✨ Recommend text ✨
+            </button>
+            <button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50"
             >
-              {isSubmitting ? 'Creating...' : 'Create Event'}
+              {isSubmitting ? 'Creating...' : '✅ Create Event ✅'}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600"
+              className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700"
             >
-              Cancel
+              ❌ Cancel ❌
             </button>
           </div>
         </form>
       </div>
+
+      {isRecTextDisplayed && (
+        <div className="absolute top-1/2 -translate-y-1/2 right-1/8 bg-white p-6 w-1/4 max-w-1/4 rounded shadow-lg text-black">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+              {recTitle == "" ? 
+                <> Loading Data 
+                  <div className="w-5 h-5 border-4 ml-3 border-purple-700 border-t-transparent rounded-full animate-spin"></div> 
+                </>
+              : "Recommended post draft"}</h2>
+            <button
+              onClick={() => setIsRecTextDisplayed(false)}
+              className="text-gray-500 hover:text-gray-700 text-2xl"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="block text-sm font-mono font-medium text-gray-700 mb-3">
+            Title
+          </div>
+          <div
+            className="
+              w-full h-20 p-3
+              border rounded-md border-gray-300 
+              bg-gray-50 text-gray-500 font-mono text-sm
+              overflow-y-auto resize-none
+              whitespace-pre-wrap
+            "
+          >
+            {recTitle == "" ? "Awaiting generation..." : recTitle}
+          </div>
+
+          <div className="block text-sm font-mono font-medium text-gray-700 my-3">
+            Content
+          </div>
+          <div
+            className="
+              w-full h-48 p-3
+              border rounded-md border-gray-300 
+              bg-gray-50 text-gray-500 font-mono text-sm
+              overflow-y-auto resize-none
+              whitespace-pre-wrap
+            "
+          >
+            {recContent == "" ? "Awaiting generation..." : recContent}
+          </div>
+        </div>
+      )}
     </div>
   );
 }; 
