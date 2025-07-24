@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { eventApi } from '../api/eventApi';
 import { fileUploadApi } from '../api/fileUploadApi';
 import { CreateEventType } from '../types/NoteType';
+import { textGenAptApi } from '../api/textGenApi';
 
 interface CreateEventProps {
   countyId: string | null;
@@ -23,6 +24,9 @@ export const CreateEvent: React.FC<CreateEventProps> = ({
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isRecTextDisplayed, setIsRecTextDisplayed] = useState(false);
+  const [recTitle, setRecTitle] = useState('');
+  const [recContent, setRecContent] = useState('');
 
   // If countyId or countyName is empty, do not render the component
   if (!countyId || !countyName) {
@@ -127,24 +131,53 @@ export const CreateEvent: React.FC<CreateEventProps> = ({
     }
   };
 
+  const recommendText = () => {
+    setRecTitle('');
+    setRecContent('');
+    setIsRecTextDisplayed(true);
+    textGenAptApi.genText(title, content)
+      .then(response => {
+        setRecTitle(response.newTitle);
+        setRecContent(response.newContent);
+      })
+      .catch(error => {
+        console.error("Error generating text:", error);
+        alert("Failed to generate text. Please try again.");
+      });
+  }
+
+  const addPictureLink = () => {
+    setPictureLinks([...pictureLinks, '']);
+  };
+
+  const removePictureLink = (index: number) => {
+    setPictureLinks(pictureLinks.filter((_, i) => i !== index));
+  };
+
+  const updatePictureLink = (index: number, value: string) => {
+    const newLinks = [...pictureLinks];
+    newLinks[index] = value;
+    setPictureLinks(newLinks);
+  };
+
   return (
     <div className="fixed left-1/2 top-1/2 overflow-visible w-1/4 transform -translate-x-1/2 -translate-y-1/2 z-50">
       <div className="relative bg-gray-200 rounded-lg shadow-lg px-4 py-6 z-0 inline-block max-w-2xl">
-      <button
-        onClick={onClose}
-        className="
-          absolute z-1 right-0 top-0
-          mx-3 my-3 px-2 py-2
-          bg-indigo-400 text-white font-semibold
-          rounded-l-full rounded-r-full shadow-lg
-          hover:bg-indigo-600
-          focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75
-          transition-all duration-300 ease-in-out
-          whitespace-nowrap              
-        "
-      >
-        <img src="close.png" className="h-5 w-5" />
-      </button>
+        <button
+          onClick={onClose}
+          className="
+            absolute z-1 right-0 top-0
+            mx-3 my-3 px-2 py-2
+            bg-indigo-400 text-white font-semibold
+            rounded-l-full rounded-r-full shadow-lg
+            hover:bg-indigo-600
+            focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75
+            transition-all duration-300 ease-in-out
+            whitespace-nowrap              
+          "
+        >
+          <img src="close.png" className="h-5 w-5" />
+        </button>
 
       <div className="bg-gray-100 rounded-lg shadow-lg p-6 max-h-[80vh] overflow-y-auto max-w-2xl">
         <div className="flex justify-between items-center mb-4">
@@ -153,128 +186,183 @@ export const CreateEvent: React.FC<CreateEventProps> = ({
           </h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title *
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Enter event title"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Content *
-            </label>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Enter event content"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Event Type
-            </label>
-            <select
-              value={eventType}
-              onChange={(e) => setEventType(e.target.value as 'TEXT' | 'IMAGE')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="TEXT">Text Only</option>
-              <option value="IMAGE">With Images</option>
-            </select>
-          </div>
-
-          {eventType === 'IMAGE' && (
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Upload Images
+                Title *
               </label>
-              
-              {/* 文件上传区域 */}
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-4">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="w-full"
-                />
-                <p className="text-sm text-gray-500 mt-2">
-                  Select one or more image files (max 10MB each)
-                </p>
-              </div>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Enter event title"
+                required
+              />
+            </div>
 
-              {/* 已选择的文件列表 */}
-              {pictureFiles.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-gray-700">Selected Files:</h4>
-                  {pictureFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                      <span className="text-sm text-gray-600 truncate">{file.name}</span>
-                      <button
-                        type="button"
-                        onClick={() => removeFile(index)}
-                        className="text-red-500 hover:text-red-700 text-sm"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Content *
+              </label>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Enter event content"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Event Type
+              </label>
+              <select
+                value={eventType}
+                onChange={(e) => setEventType(e.target.value as 'TEXT' | 'IMAGE')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="TEXT">Text Only</option>
+                <option value="IMAGE">With Images</option>
+              </select>
+            </div>
+
+            {eventType === 'IMAGE' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Upload Images
+                </label>
+                
+                {/* 文件上传区域 */}
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-4">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="w-full"
+                  />
+                  <p className="text-sm text-gray-500 mt-2">
+                    Select one or more image files (max 10MB each)
+                  </p>
                 </div>
-              )}
 
-              {/* 上传预览 */}
-              {uploadedImageUrls.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Uploaded Images:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {uploadedImageUrls.map((url, index) => (
-                      <img
-                        key={index}
-                        src={url.startsWith('http') ? url : `http://localhost:8080${url}`}
-                        alt={`Preview ${index + 1}`}
-                        className="w-16 h-16 object-cover rounded border"
-                      />
+                {/* 已选择的文件列表 */}
+                {pictureFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-700">Selected Files:</h4>
+                    {pictureFiles.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                        <span className="text-sm text-gray-600 truncate">{file.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeFile(index)}
+                          className="text-red-500 hover:text-red-700 text-sm"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     ))}
                   </div>
-                </div>
-              )}
+                )}
+
+                {/* 上传预览 */}
+                {uploadedImageUrls.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">Uploaded Images:</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {uploadedImageUrls.map((url, index) => (
+                        <img
+                          key={index}
+                          src={url.startsWith('http') ? url : `http://localhost:8080${url}`}
+                          alt={`Preview ${index + 1}`}
+                          className="w-16 h-16 object-cover rounded border"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+
+
+            <div className="flex gap-4 pt-4">
+              <button
+                  type="button"
+                  onClick={recommendText}
+                  className="flex-1 bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-800"
+                > ✨ Recommend text ✨
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting || isUploading}
+                className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {isSubmitting ? 'Creating...' : isUploading ? 'Uploading...' : '✅ Create Event ✅'}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700"
+              >
+                ❌ Cancel ❌
+              </button>
             </div>
-          )}
-
-
-
-          <div className="flex gap-4 pt-4">
-            <button
-              type="submit"
-              disabled={isSubmitting || isUploading}
-              className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50"
-            >
-              {isSubmitting ? 'Creating...' : isUploading ? 'Uploading...' : 'Create Event'}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+          </form>
       </div>
     </div>
-      </div>
+  
+      {isRecTextDisplayed && (
+        <div className="absolute top-1/2 -translate-y-1/2 right-1/8 bg-white p-6 w-1/4 max-w-1/4 rounded shadow-lg text-black">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+              {recTitle == "" ? 
+                <> Loading Data 
+                  <div className="w-5 h-5 border-4 ml-3 border-purple-700 border-t-transparent rounded-full animate-spin"></div> 
+                </>
+              : "Recommended post draft"}</h2>
+            <button
+              onClick={() => setIsRecTextDisplayed(false)}
+              className="text-gray-500 hover:text-gray-700 text-2xl"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="block text-sm font-mono font-medium text-gray-700 mb-3">
+            Title
+          </div>
+          <div
+            className="
+              w-full h-20 p-3
+              border rounded-md border-gray-300 
+              bg-gray-50 text-gray-500 font-mono text-sm
+              overflow-y-auto resize-none
+              whitespace-pre-wrap
+            "
+          >
+            {recTitle == "" ? "Awaiting generation..." : recTitle}
+          </div>
+
+          <div className="block text-sm font-mono font-medium text-gray-700 my-3">
+            Content
+          </div>
+          <div
+            className="
+              w-full h-48 p-3
+              border rounded-md border-gray-300 
+              bg-gray-50 text-gray-500 font-mono text-sm
+              overflow-y-auto resize-none
+              whitespace-pre-wrap
+            "
+          >
+            {recContent == "" ? "Awaiting generation..." : recContent}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }; 
