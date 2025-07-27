@@ -2,8 +2,6 @@ package com.citynote.dto;
 
 import com.citynote.entity.enums.EventType;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 // Holds data from backend (database) to frontend
 @Data

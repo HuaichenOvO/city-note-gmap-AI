@@ -2,8 +2,6 @@ package com.citynote.dto;
 
 import lombok.Data;
 
-import java.util.Optional;
-
 @Data
 public class EventRequestDTO {
     private String title;

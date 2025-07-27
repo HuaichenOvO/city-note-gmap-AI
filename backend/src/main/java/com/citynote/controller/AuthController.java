@@ -4,7 +4,6 @@ import com.citynote.dto.UserDTO;
 import com.citynote.entity.User;
 import com.citynote.security.JwtTokenUtil;
 import com.citynote.service.UserService;
-import lombok.Data;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
