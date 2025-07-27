@@ -146,23 +146,23 @@ export const CreateEvent: React.FC<CreateEventProps> = ({
       });
   }
 
-  const addPictureLink = () => {
-    setPictureLinks([...pictureLinks, '']);
-  };
+  // const addPictureLink = () => {
+  //   setPictureLinks([...pictureLinks, '']);
+  // };
 
-  const removePictureLink = (index: number) => {
-    setPictureLinks(pictureLinks.filter((_, i) => i !== index));
-  };
+  // const removePictureLink = (index: number) => {
+  //   setPictureLinks(pictureLinks.filter((_, i) => i !== index));
+  // };
 
-  const updatePictureLink = (index: number, value: string) => {
-    const newLinks = [...pictureLinks];
-    newLinks[index] = value;
-    setPictureLinks(newLinks);
-  };
+  // const updatePictureLink = (index: number, value: string) => {
+  //   const newLinks = [...pictureLinks];
+  //   newLinks[index] = value;
+  //   setPictureLinks(newLinks);
+  // };
 
   return (
-    <div className="fixed left-1/2 top-1/2 overflow-visible w-1/4 transform -translate-x-1/2 -translate-y-1/2 z-50">
-      <div className="relative bg-gray-200 rounded-lg shadow-lg px-4 py-6 z-0 inline-block max-w-2xl">
+    <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
+      <div className="absolute bg-gray-200 rounded-lg p-6 top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
           className="
@@ -294,7 +294,7 @@ export const CreateEvent: React.FC<CreateEventProps> = ({
                   type="button"
                   onClick={recommendText}
                   className="flex-1 bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-800"
-                > ✨ Recommend text ✨
+                > ✨ Recommend ✨
               </button>
               <button
                 type="submit"

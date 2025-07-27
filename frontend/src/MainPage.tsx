@@ -113,7 +113,7 @@ const MainPage: React.FC = () => {
           <div className="relative flex flex-row w-full flex-1 z-1">
             <ResizableSidebar
               handleNoteClick={handleNoteClick}
-              // onShowCreateEvent={handleShowCreateEvent}
+              onShowCreateEvent={handleShowCreateEvent}
             />
             <div className='relative z-2 basis-full right-0 rounded-2xl bg-gray-100 p-2'>
               <MapComponent
