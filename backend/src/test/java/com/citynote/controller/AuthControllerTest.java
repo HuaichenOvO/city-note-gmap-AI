@@ -1,6 +1,5 @@
 package com.citynote.controller;
 
-import com.citynote.dto.UserDTO;
 import com.citynote.entity.User;
 import com.citynote.security.JwtTokenUtil;
 import com.citynote.service.UserService;

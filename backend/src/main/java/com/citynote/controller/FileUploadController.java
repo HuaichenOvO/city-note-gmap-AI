@@ -131,24 +131,17 @@ public class FileUploadController {
 
     private String getContentType(String filename) {
         String extension = getExtension(filename).toLowerCase();
-        switch (extension) {
-            case ".jpg":
-            case ".jpeg":
-                return "image/jpeg";
-            case ".png":
-                return "image/png";
-            case ".gif":
-                return "image/gif";
-            case ".webp":
-                return "image/webp";
-            case ".heic":
-            case ".heif":
-                // 对于HEIC文件，返回正确的MIME类型
-                // 但浏览器可能仍然无法显示，建议用户转换为JPEG
-                return "image/heic";
-            default:
-                return "application/octet-stream"; // 通用二进制文件类型
-        }
+        return switch (extension) {
+            case ".jpg", ".jpeg" -> "image/jpeg";
+            case ".png" -> "image/png";
+            case ".gif" -> "image/gif";
+            case ".webp" -> "image/webp";
+            case ".heic", ".heif" ->
+                // for HEIC files, return the correct MIME file type
+                // but still the browser could be unable to render, user may need to convert to JPEG
+                    "image/heic";
+            default -> "application/octet-stream"; // general binary file type
+        };
     }
 
     private boolean isValidImageExtension(String extension) {
