@@ -73,7 +73,7 @@ public class FileUploadController {
             Path destPath = uploadDir.resolve(filename);
             System.out.println("Destination file: " + destPath.toAbsolutePath());
             
-            // 使用 Files.copy 而不是 transferTo
+            // use Files.copy instead of transferTo
             Files.copy(file.getInputStream(), destPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             System.out.println("File saved successfully");
 

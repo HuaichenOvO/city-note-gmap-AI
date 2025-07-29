@@ -39,10 +39,16 @@ public class AuthController {
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String token = jwtTokenUtil.generateToken(userDetails);
-        User user = userService.getUserByUsername(loginRequest.getUsername())
-            .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return ResponseEntity.ok(new AuthResponse(token, convertToDTO(user)));
+        try {
+            User user = userService.getUserByUsername(loginRequest.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            return ResponseEntity.ok(new AuthResponse(token, convertToDTO(user)));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+
+
     }
 
     @PostMapping("/register")

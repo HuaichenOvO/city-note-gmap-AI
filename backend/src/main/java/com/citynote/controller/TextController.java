@@ -17,6 +17,17 @@ public class TextController {
 
     @PostMapping("/recommend")
     public ResponseEntity<GenTextResponseDTO> getGenText(@RequestBody GenTextRequestDTO gtDto) {
-        return ResponseEntity.ok(this.tService.genText(gtDto));
+        try {
+            String title = gtDto.getTitle();
+            String content = gtDto.getCurrentText();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            GenTextResponseDTO genText = this.tService.genText(gtDto);
+            return ResponseEntity.ok(genText);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }
