@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 @source "../components/*";
-@source "../test_components/*";
 
 #root {
   max-width: 1280px;
