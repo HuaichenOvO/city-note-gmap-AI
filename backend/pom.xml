@@ -80,6 +80,19 @@
             <version>0.11.5</version>
             <scope>runtime</scope>
         </dependency>
+
+        <!--  OpenAI API   -->
+        <dependency>
+            <groupId>com.openai</groupId>
+            <artifactId>openai-java</artifactId>
+            <version>2.19.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.openai</groupId>
+            <artifactId>openai-java-spring-boot-starter</artifactId>
+            <version>2.19.0</version>
+        </dependency>
     </dependencies>
 
     <build>
