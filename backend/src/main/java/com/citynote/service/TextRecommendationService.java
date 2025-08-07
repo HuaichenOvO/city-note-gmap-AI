@@ -7,6 +7,7 @@ import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.models.chat.completions.ChatCompletionCreateParams;
 import com.openai.models.chat.completions.StructuredChatCompletionCreateParams;
+import com.openai.services.blocking.chat.ChatCompletionService;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -56,8 +57,10 @@ public class TextRecommendationService {
                 .responseFormat(GenTextResponseDTO.class)
                 .build();
 
-        Optional<GenTextResponseDTO> chatResponse = openAiClient.chat()
-                .completions().create(params)
+        ChatCompletionService chatCompletionService = openAiClient.chat().completions();
+
+        Optional<GenTextResponseDTO> chatResponse = chatCompletionService
+                .create(params)
                 .choices().get(0)
                 .message().content();
 
