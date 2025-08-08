@@ -2,16 +2,15 @@ import React, { useState, useContext, useRef, useEffect } from 'react';
 import { NoteType } from '../types/NoteType';
 import { Note } from './Note';
 import { LoadingNote } from './LoadingNote';
-import { CreateEvent } from './CreateEvent';
 import { eventContext } from '../context/eventContext';
 
 type ResizableSidebarProps = {
   handleNoteClick: (noteObj: NoteType) => void;
+  onShowCreateEvent: () => void;
 };
 
 export const ResizableSidebar: React.FC<ResizableSidebarProps> = (props) => {
   const { data, handler } = useContext(eventContext);
-  const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(400); // 默认宽度
   const [isVisible, setIsVisible] = useState(false);
@@ -26,12 +25,6 @@ export const ResizableSidebar: React.FC<ResizableSidebarProps> = (props) => {
       setIsVisible(false);
     }
   }, [data.countyName]);
-
-  const handleEventCreated = () => {
-    if (data.countyId) {
-      handler.refreshNotes();
-    }
-  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -96,7 +89,7 @@ export const ResizableSidebar: React.FC<ResizableSidebarProps> = (props) => {
               ×
             </button>
           </div>
-          
+
           <div className="flex-grow overflow-y-auto pr-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {data.notes.map((note) => (
@@ -107,7 +100,7 @@ export const ResizableSidebar: React.FC<ResizableSidebarProps> = (props) => {
               ))}
             </div>
           </div>
-                </div>
+        </div>
 
         {/* 拖拽调整大小的手柄 */}
         <div
@@ -123,24 +116,15 @@ export const ResizableSidebar: React.FC<ResizableSidebarProps> = (props) => {
         {/* Create Event按钮固定在右下角 */}
         {data.countyName && (
           <button
-            onClick={() => setShowCreateEvent(true)}
+            onClick={props.onShowCreateEvent}
             className="absolute bottom-6 right-7 px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors duration-200 shadow-lg"
           >
             + Create Event
           </button>
         )}
 
- 
-      </div>
 
-      {showCreateEvent && data.countyId && data.countyName && (
-        <CreateEvent
-          countyId={data.countyId}
-          countyName={data.countyName}
-          onClose={() => setShowCreateEvent(false)}
-          onEventCreated={handleEventCreated}
-        />
-      )}
+      </div>
     </>
   );
 }; 

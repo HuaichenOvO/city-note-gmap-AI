@@ -3,7 +3,6 @@ package com.citynote.controller;
 import com.citynote.dto.EventResponseDTO;
 import com.citynote.dto.EventRequestDTO;
 import com.citynote.service.EventService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,10 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("api/event")
+@RequestMapping("/event")
 public class EventController {
 
     private final EventService eventService;
@@ -66,11 +63,9 @@ public class EventController {
         if (!eventService.canUserModifyEvent(id)) {
             return ResponseEntity.status(403).build();
         }
-        
+
         return eventService.getEventById(id)
-                .map(evt ->
-                        ResponseEntity.ok(eventService.updateEvent(id, eventRequestDTO))
-                )
+                .map(evt -> ResponseEntity.ok(eventService.updateEvent(id, eventRequestDTO)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -81,11 +76,10 @@ public class EventController {
         if (!eventService.canUserModifyEvent(id)) {
             return ResponseEntity.status(403).build();
         }
-        
+
         return eventService.getEventById(id)
                 .map(
-                        evt -> ResponseEntity.ok(eventService.deleteEvent(id))
-                )
+                        evt -> ResponseEntity.ok(eventService.deleteEvent(id)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -102,4 +96,3 @@ public class EventController {
     }
 
 }
-

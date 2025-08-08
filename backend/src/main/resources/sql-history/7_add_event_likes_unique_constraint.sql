@@ -11,3 +11,9 @@ AND el1.user_id = el2.user_id;
 -- Add unique constraint
 ALTER TABLE event_likes 
 ADD CONSTRAINT uk_event_user_like UNIQUE (event_id, user_id); 
+
+-- 级联删除外键
+ALTER TABLE event_likes DROP FOREIGN KEY FK6ct2im7758h1eh0e1o2ar6rgt;
+ALTER TABLE event_likes
+  ADD CONSTRAINT FK6ct2im7758h1eh0e1o2ar6rgt
+  FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE; 

@@ -1,7 +1,6 @@
 package com.citynote.entity.enums;
 
-public enum EventType{
+public enum EventType {
     TEXT,
-    IMAGE,
-    VIDEO
+    IMAGE
 }

@@ -33,6 +33,7 @@ const Signup: React.FC = () => {
           <label className="block text-gray-700 text-sm font-bold mb-2">Username:</label>
           <input
             type="text"
+            name="username"
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
@@ -43,6 +44,7 @@ const Signup: React.FC = () => {
           <label className="block text-gray-700 text-sm font-bold mb-2">Email:</label>
           <input
             type="email"
+            name="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
@@ -53,6 +55,7 @@ const Signup: React.FC = () => {
           <label className="block text-gray-700 text-sm font-bold mb-2">Password:</label>
           <input
             type="password"
+            name="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
@@ -63,6 +66,7 @@ const Signup: React.FC = () => {
           <label className="block text-gray-700 text-sm font-bold mb-2">Confirm Password:</label>
           <input
             type="password"
+            name="confirmPassword"
             value={confirmPassword}
             onChange={e => setConfirmPassword(e.target.value)}
             required
@@ -70,8 +74,8 @@ const Signup: React.FC = () => {
           />
         </div>
         {error && <div className="text-red-500 mb-4">{error}</div>}
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mb-4"
         >
           Sign Up

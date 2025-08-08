@@ -1,0 +1,30 @@
+[Unit]
+Description=City Note Backend Service
+After=network.target
+
+[Service]
+Type=simple
+User=ec2-user
+WorkingDirectory=/opt/city-note
+ExecStart=/usr/bin/java -jar city-note-backend.jar --spring.config.location=classpath:/,file:/opt/city-note/
+Restart=always
+RestartSec=10
+
+# 环境变量
+Environment=SPRING_PROFILES_ACTIVE=prod
+Environment=JAVA_OPTS=-Xmx512m -Xms256m
+
+# 日志配置
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=city-note-backend
+
+# 安全设置
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/city-note/uploads
+
+[Install]
+WantedBy=multi-user.target 
