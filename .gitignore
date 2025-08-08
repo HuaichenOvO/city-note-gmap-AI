@@ -43,6 +43,7 @@ src/test_components/
 .env.development.local
 .env.test.local
 .env.production.local
+!.env.example
 
 # Logs
 npm-debug.log*

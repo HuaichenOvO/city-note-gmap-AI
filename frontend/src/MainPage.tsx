@@ -10,7 +10,7 @@ import { MapComponent } from './components/MapComponent';
 import { NoteDetail } from './components/NoteDetail';
 import { CreateEvent } from './components/CreateEvent';
 import { UserProfilePage } from './components/UserProfile';
-import { GMAP_API_KEY, GMAP_MAP_ID } from '../env';
+import { GMAP_API_KEY, GMAP_MAP_ID } from './env';
 import { CITY_JSON } from '../pj_config';
 import { eventApi } from './api/eventApi';
 

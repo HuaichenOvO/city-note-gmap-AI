@@ -38,9 +38,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUser(userData);
         } catch (error) {
           console.log('Token validation failed:', error);
+          // 清除无效的token
           localStorage.removeItem('token');
           setUser(null);
         }
+      } else {
+        setUser(null);
       }
       setLoading(false);
     };
@@ -61,13 +64,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       authApi.logout();
       setUser(null);
-      // Simple redirect without React Router
-      window.location.replace('/login');
+      // 清除所有相关的本地存储
+      localStorage.removeItem('token');
+      // 重定向到登录页面
+      window.location.href = '/login';
     } catch (error) {
       console.error('Logout error:', error);
-      // Fallback: just clear storage and reload
+      // 备用方案：清除存储并重新加载
       localStorage.clear();
-      window.location.reload();
+      window.location.href = '/login';
     }
   };
 

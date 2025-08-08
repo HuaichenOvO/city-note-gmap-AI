@@ -52,7 +52,7 @@ public class TextRecommendationService {
                              and the content \
                              ```\
                              %s\
-                             ```""", gTRequest.getCurrentText(), gTRequest.getTitle()))
+                             ```""", gTRequest.currentText, gTRequest.title))
                 .responseFormat(GenTextResponseDTO.class)
                 .build();
 

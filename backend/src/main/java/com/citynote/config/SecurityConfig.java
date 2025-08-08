@@ -30,14 +30,7 @@ public class SecurityConfig {
             .cors(cors -> {})
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("GET", "/api/event/county/**").permitAll()
-                .requestMatchers("GET", "/api/event/user/**").permitAll()
-                .requestMatchers("/api/event/**").authenticated()
-                .requestMatchers("/api/user/**").permitAll()
-                .requestMatchers("GET", "/api/upload/image/**").permitAll()
-                .requestMatchers("POST", "/api/upload/image").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()  
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

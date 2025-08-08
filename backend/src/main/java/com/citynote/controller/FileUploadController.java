@@ -21,7 +21,7 @@ import org.springframework.http.MediaType;
 import java.net.MalformedURLException;
 
 @RestController
-@RequestMapping("/api/upload")
+@RequestMapping("/upload")
 public class FileUploadController {
     @Value("${file.upload.path:uploads/}")
     private String uploadPath;
