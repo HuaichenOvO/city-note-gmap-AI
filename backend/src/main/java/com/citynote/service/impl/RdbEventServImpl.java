@@ -14,21 +14,31 @@ import com.citynote.security.JwtTokenUtil;
 import com.sun.jdi.request.EventRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.io.File;
+import java.util.stream.Collectors;
 
 @Service
 @Qualifier("RdbEventServiceImpl")
 public class RdbEventServImpl implements EventService {
+
+    @Value("${file.upload.path:uploads/}")
+    private String uploadPath;
+    private final String filePrefix = "http://localhost:8080/api/upload/image";
 
     private final EventRepository eventRepository;
     private final BlobRepository blobRepository;
@@ -108,13 +118,13 @@ public class RdbEventServImpl implements EventService {
         }
 
         String currentUsername = authentication.getName();
-        System.out.println("Creating event for user: " + currentUsername);
+        System.out.println("[Event Service] Creating event for user: " + currentUsername);
 
         // Find user profile by username
         Optional<UserProfile> userProfileOpt = userProfileRepository.findByUsername(currentUsername);
         if (userProfileOpt.isPresent()) {
             eventEntity.setUserProfile(userProfileOpt.get());
-            System.out.println("Found user profile: " + userProfileOpt.get().getId());
+            System.out.println("[Event Service] Found user profile: " + userProfileOpt.get().getId());
         } else {
             throw new RuntimeException("User profile not found for username: " + currentUsername);
         }
@@ -178,15 +188,23 @@ public class RdbEventServImpl implements EventService {
 
         EventEntity eventEntity = eventOpt.get();
 
+        System.out.printf("""
+                        [Event Service] Updating event: %s
+                        Entity picture list: %s
+                        DTO picture list:%s
+                        """, eventEntity.getId(),
+                Arrays.toString(eventEntity.getBlobs().stream().map(BlobEntity::getFilename).toArray()),
+                Arrays.toString(eventRequestDTO.getPictureLinks()));
+
         // Update basic fields
         eventEntity.setTitle(eventRequestDTO.getTitle());
         eventEntity.setContent(eventRequestDTO.getContent());
         eventEntity.setLastUpdateDate(LocalDateTime.now());
 
-        // 先保存event的更新
         eventEntity = eventRepository.save(eventEntity);
 
         // 使用JPQL直接删除blobs，避免级联问题
+        // use JPQL to delete blobs directly, preventing cascade problems
         blobRepository.deleteByEventId(eventId);
 
         // Update event type and blobs based on content
@@ -214,28 +232,54 @@ public class RdbEventServImpl implements EventService {
         // if no related data in DB, there will be no errors
         Optional<EventEntity> eOptional = eventRepository.findById(eventId);
         if (eOptional.isPresent()) {
+            String rootDir = System.getProperty("user.dir");
             EventEntity event = eOptional.get();
-            // 删除本地图片文件
+            List<BlobEntity> blobs = blobRepository.findBlobEntitiesByEvent(event);
+            List<String> filenames;
+
+            // get the file names
             try {
-                List<BlobEntity> blobs = blobRepository.findBlobEntitiesByEvent(event);
-                String uploadDir = System.getProperty("user.dir") + File.separator + "uploads";
-                for (BlobEntity blob : blobs) {
-                    String filename = blob.getFilename();
-                    if (filename != null) {
-                        File file = new File(uploadDir, filename);
-                        if (file.exists()) {
-                            boolean deleted = file.delete();
-                            System.out.println("[deleteEvent] Deleted image file: " + file.getAbsolutePath()
-                                    + " success: " + deleted);
-                        } else {
-                            System.out.println("[deleteEvent] Image file not found: " + file.getAbsolutePath());
-                        }
+                filenames = blobs.stream()
+                        .map(s -> {
+                            String filename = s.getFilename();
+                            if (!filename.startsWith(filePrefix)) {
+                                throw new RuntimeException("Invalid filename: " + filename);
+                            }
+                            String fileName = filename.substring(filePrefix.length());
+                            return Paths.get(rootDir, uploadPath, fileName).toAbsolutePath().toString();
+                        })
+                        .toList();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            // delete the files
+            try {
+                for (String fullPath : filenames) {
+                    File targetFile = new File(fullPath);
+                    if (!targetFile.exists()) {
+                        throw new RuntimeException("File does not exist: " + fullPath);
+                    }
+                    if (targetFile.delete()) {
+                        System.out.println("[Event Service] successfully removed file: " + fullPath);
+                    }
+                    else {
+                        throw new RuntimeException("Failed to remove file: " + fullPath);
                     }
                 }
-            } catch (Exception ex) {
-                System.err.println("[deleteEvent] Error deleting image files: " + ex.getMessage());
+            } catch (Error error) {
+                error.printStackTrace();
+                return false;
             }
-            eventRepository.delete(event);
+
+            // delete the entities in the repository
+            try {
+                blobRepository.deleteAll(blobs);
+                eventRepository.delete(event);
+            } catch (Exception e) {
+                return false;
+            }
             return true;
         }
         return false;
@@ -329,30 +373,30 @@ public class RdbEventServImpl implements EventService {
         }
 
         String currentUsername = authentication.getName();
-        System.out.println("Checking permissions for user: " + currentUsername + " on event: " + eventId);
+        System.out.println("[Event Service] Checking permissions for user: " + currentUsername + " on event: " + eventId);
 
         Optional<EventEntity> eventOpt = eventRepository.findById(eventId);
 
         if (eventOpt.isPresent()) {
             EventEntity event = eventOpt.get();
-            System.out.println("Found event: " + event.getTitle());
+            System.out.println("[Event Service] Found event: " + event.getTitle());
 
             if (event.getUserProfile() != null) {
-                System.out.println("Event has user profile: " + event.getUserProfile().getId());
+                System.out.println("[Event Service] Event has user profile: " + event.getUserProfile().getId());
                 if (event.getUserProfile().getUser() != null) {
                     String eventOwnerUsername = event.getUserProfile().getUser().getUsername();
-                    System.out.println("Event owner: " + eventOwnerUsername);
+                    System.out.println("[Event Service] Event owner: " + eventOwnerUsername);
                     boolean canModify = currentUsername.equals(eventOwnerUsername);
-                    System.out.println("Can modify: " + canModify);
+                    System.out.println("[Event Service] Can modify: " + canModify);
                     return canModify;
                 } else {
-                    System.out.println("Event user profile has no user");
+                    System.out.println("[Event Service] Event user profile has no user");
                 }
             } else {
-                System.out.println("Event has no user profile");
+                System.out.println("[Event Service] Event has no user profile");
             }
         } else {
-            System.out.println("Event not found with ID: " + eventId);
+            System.out.println("[Event Service] Event not found with ID: " + eventId);
         }
 
         return false;
