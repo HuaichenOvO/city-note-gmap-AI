@@ -26,8 +26,6 @@ export const ResizableSidebar: React.FC<ResizableSidebarProps> = (props) => {
     }
   }, [data.countyName]);
 
-
-
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsResizing(true);
@@ -91,7 +89,7 @@ export const ResizableSidebar: React.FC<ResizableSidebarProps> = (props) => {
               ×
             </button>
           </div>
-          
+
           <div className="flex-grow overflow-y-auto pr-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {data.notes.map((note) => (
@@ -102,7 +100,7 @@ export const ResizableSidebar: React.FC<ResizableSidebarProps> = (props) => {
               ))}
             </div>
           </div>
-                </div>
+        </div>
 
         {/* 拖拽调整大小的手柄 */}
         <div
@@ -125,7 +123,6 @@ export const ResizableSidebar: React.FC<ResizableSidebarProps> = (props) => {
           </button>
         )}
 
- 
       </div>
     </>
   );

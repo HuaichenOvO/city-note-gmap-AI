@@ -33,7 +33,7 @@ export const NoteDetail = (props: {
 
   const checkUserPermissions = async () => {
     if (!props.note) return;
-    
+
     try {
       console.log('Checking permissions for event:', props.note.noteId);
       const hasPermission = await eventApi.canUserModifyEvent(props.note.noteId);
@@ -52,14 +52,14 @@ export const NoteDetail = (props: {
         console.log('Toggling like for note:', props.note.noteId);
         const isLiked = await eventApi.toggleEventLike(props.note.noteId);
         console.log('API response:', isLiked);
-        
+
         // Update local state based on the response
         if (isLiked) {
           setLike(like + 1);
         } else {
           setLike(Math.max(0, like - 1));
         }
-        
+
         handler.refreshNotes();
         console.log('Like toggled successfully');
       } catch (error) {
@@ -76,11 +76,11 @@ export const NoteDetail = (props: {
 
   const handleDelete = async () => {
     if (!props.note) return;
-    
+
     if (!confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
       return;
     }
-    
+
     try {
       await eventApi.deleteEvent(props.note.noteId);
       // 刷新notes列表
@@ -146,8 +146,8 @@ export const NoteDetail = (props: {
 
             {props.note.pictureLinks && props.note.pictureLinks.length > 0 && (
               <div className="mb-6">
-                <ImageCarousel 
-                  images={props.note.pictureLinks} 
+                <ImageCarousel
+                  images={props.note.pictureLinks}
                   className="w-full"
                 />
               </div>
@@ -155,13 +155,13 @@ export const NoteDetail = (props: {
 
 
             <div className='w-full mt-3 bg-gray-200 flex'>
-              <button 
-                className={`flex items-center space-x-2 ${isLikeLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-300'}`} 
+              <button
+                className={`flex items-center space-x-2 ${isLikeLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-300'}`}
                 onClick={handleLike}
                 disabled={isLikeLoading}
               >
-                <img 
-                  src="/love.png" 
+                <img
+                  src="/love.png"
                   alt="like"
                   className='bg-red-300 w-5 h-5 rounded-md hover:bg-red-500 transition-colors duration-200'
                   onError={(e) => {
@@ -172,7 +172,6 @@ export const NoteDetail = (props: {
                 <span className="text-gray-700 font-medium">: {like}</span>
                 {isLikeLoading && <span className="text-xs text-gray-500">...</span>}
               </button>
-              
               {canModify && (
                 <div className="ml-auto flex space-x-2">
                   <button

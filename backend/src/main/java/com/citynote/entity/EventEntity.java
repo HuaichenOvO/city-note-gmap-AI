@@ -2,14 +2,12 @@ package com.citynote.entity;
 
 import com.citynote.entity.enums.EventType;
 import jakarta.persistence.*;
-import lombok.Data;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
 @Entity
 @Table(name = "events")
 @DynamicInsert
@@ -25,11 +23,7 @@ public class EventEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @OneToMany(fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            mappedBy = "event"
-    )
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "event")
     private List<BlobEntity> blobs;
 
     @Enumerated(EnumType.STRING)

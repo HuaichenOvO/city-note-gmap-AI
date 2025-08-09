@@ -14,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -28,21 +27,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> {})
-            .csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("GET", "/api/event/county/**").permitAll()
-                .requestMatchers("GET", "/api/event/user/**").permitAll()
-                .requestMatchers("/api/event/**").authenticated()
-                .requestMatchers("/api/users/**").permitAll()
-                .requestMatchers("GET", "/api/upload/image/**").permitAll()
-                .requestMatchers("POST", "/api/upload/image").permitAll()
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            );
+
+                .cors(cors -> {
+                })
+                .csrf(csrf -> csrf
+                        .disable())
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().permitAll())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -59,5 +52,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-
-} 
+}

@@ -5,7 +5,7 @@ export type NoteType = {
     pictureLinks?: string[] | null;
     date: Date;
     county: string;
-    countyId?: number;  
+    countyId?: number;
     eventType: string;
     likes: number;
     authorUsername: string;

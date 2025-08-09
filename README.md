@@ -1,30 +1,79 @@
-# City Note GMap AI
+# City Note - Google Maps AI Integration
 
-## Description
-This repo is based on the finished code for the [Google Maps Platform 101: React codelab](https://developers.google.com/codelabs/maps-platform/maps-platform-101-react-js).
+## Project Description
+City Note is a city note application that integrates Google Maps and AI functionality, allowing users to create, view, and manage events on a map.
 
-The project aims to develop a city-based travel recommendation app, providing users with a map-based travel note community, multi-type note uploading, and AI-powered auto travel tip drafting.
+## Quick Start
 
-## Techstack architecture
+### Requirements
+- Java 17+
+- Node.js 18+
+- Maven 3.6+
+- MySQL 8.0+
 
-This project is developed using React (TypeScript) as frontend, Spring Boot as backend, and MySQL / MangoDB as database. The backend and database are deployed on AWS EC2 virtual machine for public access.
-
-## Getting Started
-
-To run the app, run the following from their respective directories:
-
-1. `npm i`
-2. `npm start`
-
-This will install the needed dependencies and run the app locally in your browser using Webpack Dev Server.
-
-## Google Map API 使用
-
-首先在 `Google Map API` 中激活自己的 `API Key` ，然后在 `package.json` 的同级目录中 新建 `env.js` ，定义两个变量 export const `GMAP_API_KEY` 和 `GMAP_MAP_ID` ，定义并赋值之后 `app.tsx` 会自动引用，然后地图部分的功能应该就可以正常跑起来了
-
-## 运行后端
-1. 进入backend目录
-2. 运行命令：
+### Local Development
+1. Clone the project
 ```bash
-./mvnw spring-boot:run
+git clone <repository-url>
+cd city-note-gmap-AI
 ```
+
+2. Start local development environment
+```bash
+./dev.sh
+```
+
+### Deploy to EC2
+
+#### 1. Configure SSH Key
+Before deploying, you need to modify the SSH key configuration in the `deploy.sh` script:
+
+```bash
+# Edit deploy.sh file
+vim deploy.sh
+
+# Find the following line and modify it with your pem filename
+SSH_KEY="~/.ssh/your-key.pem"  # Replace with your actual pem filename
+```
+
+**Supported path formats:**
+- `~/.ssh/your-key.pem` - Relative path (recommended)
+- `/absolute/path/to/your-key.pem` - Absolute path
+
+#### 2. Run deployment script
+```bash
+./deploy.sh
+```
+
+The deployment script will automatically:
+- Run tests
+- Build the application
+- Upload to EC2
+- Configure services
+
+## Project Structure
+```
+city-note-gmap-AI/
+├── backend/                 # Spring Boot backend
+├── frontend/               # React frontend
+├── deploy.sh              # Deployment script
+├── dev.sh                 # Local development script
+└── README.md             # Project documentation
+```
+
+## Tech Stack
+- **Backend**: Spring Boot, MySQL, JWT
+- **Frontend**: React, TypeScript, Tailwind CSS
+- **Maps**: Google Maps API
+- **AI**: OpenAI API
+- **Deployment**: AWS EC2, Nginx
+
+## Contributing
+1. Fork the project
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+MIT License

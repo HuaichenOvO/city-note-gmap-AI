@@ -12,7 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/event")
+@RequestMapping("/event")
 public class EventController {
 
     private final EventService eventService;
@@ -63,11 +63,9 @@ public class EventController {
         if (!eventService.canUserModifyEvent(id)) {
             return ResponseEntity.status(403).build();
         }
-        
+
         return eventService.getEventById(id)
-                .map(evt ->
-                        ResponseEntity.ok(eventService.updateEvent(id, eventRequestDTO))
-                )
+                .map(evt -> ResponseEntity.ok(eventService.updateEvent(id, eventRequestDTO)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -78,11 +76,10 @@ public class EventController {
         if (!eventService.canUserModifyEvent(id)) {
             return ResponseEntity.status(403).build();
         }
-        
+
         return eventService.getEventById(id)
                 .map(
-                        evt -> ResponseEntity.ok(eventService.deleteEvent(id))
-                )
+                        evt -> ResponseEntity.ok(eventService.deleteEvent(id)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -99,4 +96,3 @@ public class EventController {
     }
 
 }
-

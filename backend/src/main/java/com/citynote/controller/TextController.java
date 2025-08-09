@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/text")
+@RequestMapping("/text")
 public class TextController {
     private final TextRecommendationService tService;
 
@@ -17,17 +17,6 @@ public class TextController {
 
     @PostMapping("/recommend")
     public ResponseEntity<GenTextResponseDTO> getGenText(@RequestBody GenTextRequestDTO gtDto) {
-        try {
-            String title = gtDto.getTitle();
-            String content = gtDto.getCurrentText();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-        try {
-            GenTextResponseDTO genText = this.tService.genText(gtDto);
-            return ResponseEntity.ok(genText);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok(this.tService.genText(gtDto));
     }
 }

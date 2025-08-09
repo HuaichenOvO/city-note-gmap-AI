@@ -16,7 +16,7 @@ const Login: React.FC = () => {
       console.log('Attempting login with:', { username, password: '***' });
       await login(username, password);
       console.log('Login successful');
-      
+
       // Navigate to home page
       navigate('/');
     } catch (err) {
@@ -33,6 +33,7 @@ const Login: React.FC = () => {
           <label className="block text-gray-700 text-sm font-bold mb-2">Username:</label>
           <input
             type="text"
+            name="username"
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
@@ -43,6 +44,7 @@ const Login: React.FC = () => {
           <label className="block text-gray-700 text-sm font-bold mb-2">Password:</label>
           <input
             type="password"
+            name="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
@@ -50,8 +52,8 @@ const Login: React.FC = () => {
           />
         </div>
         {error && <div className="text-red-500 mb-4">{error}</div>}
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mb-4"
         >
           Login

@@ -15,7 +15,18 @@ export const fileUploadApi = {
                 'Content-Type': 'multipart/form-data',
             },
         });
-        
+
         return response.data.url;
+    },
+    deleteImage: async (fileLink: string): Promise<number> => {
+        console.log(`[File api]: deleting this file: ${fileLink}`);
+
+        const response = await api.delete<number>(`/upload/image`, {
+            data: fileLink.substring(21),
+            headers: {
+                'Content-Type': 'text/plain'
+            }
+        });
+        return response.data;
     }
 }; 

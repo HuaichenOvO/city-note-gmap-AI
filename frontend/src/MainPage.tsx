@@ -10,7 +10,7 @@ import { MapComponent } from './components/MapComponent';
 import { NoteDetail } from './components/NoteDetail';
 import { CreateEvent } from './components/CreateEvent';
 import { UserProfilePage } from './components/UserProfile';
-import { GMAP_API_KEY, GMAP_MAP_ID } from '../env';
+import { GMAP_API_KEY, GMAP_MAP_ID } from './env';
 import { CITY_JSON } from '../pj_config';
 import { eventApi } from './api/eventApi';
 
@@ -79,7 +79,6 @@ const MainPage: React.FC = () => {
   };
 
 
-
   // Check if we're on the profile page
   const isProfilePage = location.pathname === '/profile';
 
@@ -100,7 +99,7 @@ const MainPage: React.FC = () => {
               }} />
             </div>
           ) : null}
-          
+
           {showCreateEvent && data.countyId && data.countyName ? (
             <CreateEvent
               countyId={data.countyId}

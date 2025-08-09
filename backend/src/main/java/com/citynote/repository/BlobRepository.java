@@ -16,7 +16,7 @@ public interface BlobRepository extends JpaRepository<BlobEntity, Integer> {
     List<BlobEntity> findBlobEntitiesByEvent(EventEntity event);
 
     List<BlobEntity> findBlobEntitiesByEvent_Id(int eventId);
-    
+
     @Modifying
     @Query("DELETE FROM BlobEntity b WHERE b.event.id = :eventId")
     void deleteByEventId(@Param("eventId") int eventId);

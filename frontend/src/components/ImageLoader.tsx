@@ -12,18 +12,21 @@ export const ImageLoader: React.FC<ImageLoaderProps> = ({ src, ...props }) => {
 
   // Handle image URL, add server prefix for local uploaded images
   const getImageUrl = (imageSrc: string): string => {
+    let result = "";
     if (imageSrc.startsWith('/api/upload/')) {
-      return `http://localhost:8080${imageSrc}`;
+      result = `http://localhost:8080${imageSrc}`;
     }
     // If already a full URL, return as is
     if (imageSrc.startsWith('http://') || imageSrc.startsWith('https://')) {
-      return imageSrc;
+      result = imageSrc;
     }
     // If relative path, add server prefix
     if (imageSrc.startsWith('/')) {
-      return `http://localhost:8080${imageSrc}`;
+      result = `http://localhost:8080${imageSrc}`;
     }
-    return imageSrc;
+    result = imageSrc;
+    // console.log(`[Image Loader] processed image URL: ${result}`);
+    return result;
   };
 
   useEffect(() => {
@@ -34,11 +37,6 @@ export const ImageLoader: React.FC<ImageLoaderProps> = ({ src, ...props }) => {
     imgInstance.src = getImageUrl(src);
 
     imgInstance.onload = () => {
-      setLoading(false);
-      setError(false);
-    };
-
-    imgInstance.onerror = () => {
       setLoading(false);
       setError(true);
     };

@@ -1,12 +1,10 @@
 package com.citynote.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 
-@Data
 @Entity
 @Table(name = "event_likes", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"event_id", "user_id"})
+        @UniqueConstraint(columnNames = { "event_id", "user_id" })
 })
 public class EventLikeEntity {
     @Id

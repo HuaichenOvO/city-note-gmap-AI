@@ -38,9 +38,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUser(userData);
         } catch (error) {
           console.log('Token validation failed:', error);
+          // clear invalid tokens
           localStorage.removeItem('token');
           setUser(null);
         }
+      } else {
+        setUser(null);
       }
       setLoading(false);
     };
@@ -61,13 +64,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       authApi.logout();
       setUser(null);
-      // Simple redirect without React Router
-      window.location.replace('/login');
+      // clear corresponding local cache
+      localStorage.removeItem('token');
+      // redirect to the login page
+      window.location.href = '/login';
     } catch (error) {
       console.error('Logout error:', error);
-      // Fallback: just clear storage and reload
+      // plan B: clear the cache and reload
       localStorage.clear();
-      window.location.reload();
+      window.location.href = '/login';
     }
   };
 

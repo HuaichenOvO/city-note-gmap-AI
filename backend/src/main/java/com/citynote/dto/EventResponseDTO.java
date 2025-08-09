@@ -116,4 +116,3 @@ public class EventResponseDTO {
         this.authorLastName = authorLastName;
     }
 }
-

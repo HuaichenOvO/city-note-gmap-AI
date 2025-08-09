@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,108 +21,154 @@ import org.springframework.http.MediaType;
 import java.net.MalformedURLException;
 
 @RestController
-@RequestMapping("/api/upload")
+@RequestMapping("/upload")
 public class FileUploadController {
+    private final String filePrefix = "/api/upload/image";
+
     @Value("${file.upload.path:uploads/}")
     private String uploadPath;
 
     @PostMapping("/image")
-    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
+    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file,
+            HttpServletRequest request) {
         try {
-            System.out.println("Upload request received for file: " + file.getOriginalFilename());
-            System.out.println("File size: " + file.getSize() + " bytes");
-            System.out.println("Upload path: " + uploadPath);
-            
+            System.out.printf("[File Controller] Request uploading file: %s, size: %s bytes, path: %s\n",
+                    file.getOriginalFilename(), file.getSize(), uploadPath);
+
             // Check file size (50MB limit)
             if (file.getSize() > 50 * 1024 * 1024) {
                 System.err.println("File too large: " + file.getSize() + " bytes");
                 return ResponseEntity.badRequest().body(Map.of("error", "File size exceeds 50MB limit"));
             }
-            
+
             // Check file type by extension
             String originalFilename = file.getOriginalFilename();
             if (originalFilename == null || originalFilename.isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Invalid filename"));
             }
-            
+
             String extension = getExtension(originalFilename);
             if (!isValidImageExtension(extension)) {
                 System.err.println("Invalid file extension: " + extension);
-                return ResponseEntity.badRequest().body(Map.of("error", "Only image files are allowed (jpg, jpeg, png, gif, webp, heic, heif)"));
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Only image files are allowed (jpg, jpeg, png, gif, webp, heic, heif)"));
             }
-            
-            // 创建上传目录 - 使用绝对路径
+
+            // create upload directory - using absolute path
             Path uploadDir;
             if (uploadPath.startsWith("/")) {
-                // 绝对路径
+                // absolute path
                 uploadDir = Paths.get(uploadPath);
             } else {
-                // 相对路径，转换为绝对路径
+                // convert the relative path to absolute apth
                 uploadDir = Paths.get(System.getProperty("user.dir"), uploadPath);
             }
-            
-            System.out.println("Upload directory path: " + uploadDir.toAbsolutePath());
-            
+
             if (!Files.exists(uploadDir)) {
                 System.out.println("Creating upload directory...");
                 Files.createDirectories(uploadDir);
             }
 
             String filename = UUID.randomUUID() + extension;
-            System.out.println("Generated filename: " + filename);
-            
+
             Path destPath = uploadDir.resolve(filename);
-            System.out.println("Destination file: " + destPath.toAbsolutePath());
-            
-            // use Files.copy instead of transferTo
+
+            // use Files.copy instead of transferTO
             Files.copy(file.getInputStream(), destPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-            System.out.println("File saved successfully");
 
             String serverUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
             String imageUrl = serverUrl + "/api/upload/image/" + filename;
-            System.out.println("Image URL: " + imageUrl);
+
+            System.out.printf("""
+                    [File Controller] File saved successfully.
+                    \tUpload directory path: %s
+                    \tGenerated filename: %s
+                    \tGenerated full path: %s
+                    \tImage URL: %s
+                    """,
+                    uploadDir.toAbsolutePath(), filename, destPath.toAbsolutePath(), imageUrl);
 
             Map<String, String> response = new HashMap<>();
             response.put("url", imageUrl);
             response.put("filename", filename);
+            // ------------------------------------------------
+
             return ResponseEntity.ok(response);
         } catch (IOException e) {
             System.err.println("Error during file upload: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "File upload failed: " + e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "File upload failed: " + e.getMessage()));
         } catch (Exception e) {
             System.err.println("Unexpected error during file upload: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Unexpected error: " + e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Unexpected error: " + e.getMessage()));
         }
     }
 
     @GetMapping("/image/{filename:.+}")
     public ResponseEntity<Resource> getImage(@PathVariable String filename) {
+        System.out.println("[File Controller] <GET /image/{filename:.+}> - " + filename);
         try {
-            // 使用与上传相同的路径解析逻辑
             Path uploadDir;
             if (uploadPath.startsWith("/")) {
-                // 绝对路径
+                // absolute path
                 uploadDir = Paths.get(uploadPath);
             } else {
-                // 相对路径，转换为绝对路径
+                // relative path to absolute path
                 uploadDir = Paths.get(System.getProperty("user.dir"), uploadPath);
             }
-            
             Path filePath = uploadDir.resolve(filename).normalize();
+            System.out.println("[GET /image/{filename:.+}] - " + filePath.toAbsolutePath());
+
             Resource resource = new UrlResource(filePath.toUri());
             if (resource.exists()) {
                 // 根据文件扩展名确定Content-Type
                 String contentType = getContentType(filename);
                 return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType))
-                    .body(resource);
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .body(resource);
             } else {
                 return ResponseEntity.notFound().build();
             }
         } catch (MalformedURLException e) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/image")
+    public ResponseEntity<Integer> removeFile(@RequestBody String filename) {
+        System.out.println("[File Controller] Delete - " + filename);
+        try {
+            // assuming the file starts with prefix: "/api/upload/image"
+            if (!filename.startsWith(filePrefix)) {
+                return ResponseEntity.badRequest().body(-3);
+            }
+            String fileName = filename.substring(filePrefix.length());
+            String rootDir = System.getProperty("user.dir");
+            String fullPath = Paths.get(rootDir, uploadPath, fileName).toAbsolutePath().toString();
+
+            System.out.printf("""
+                    [File Controller] request to remove URI: %s
+                    \tconverted to filepath: %s
+                    """, filename, fullPath);
+
+            File targetFile = new File(fullPath);
+            if (!targetFile.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+            // delete the file
+            if (targetFile.delete()) {
+                System.out.println("[File Controller] successfully removed file: " + fullPath);
+                return ResponseEntity.ok().body(0);
+            } else {
+                return ResponseEntity.badRequest().body(-2);
+            }
+
+        } catch (Error error) {
+            error.printStackTrace();
+            return ResponseEntity.badRequest().body(-1);
         }
     }
 
@@ -131,23 +178,30 @@ public class FileUploadController {
 
     private String getContentType(String filename) {
         String extension = getExtension(filename).toLowerCase();
-        return switch (extension) {
-            case ".jpg", ".jpeg" -> "image/jpeg";
-            case ".png" -> "image/png";
-            case ".gif" -> "image/gif";
-            case ".webp" -> "image/webp";
-            case ".heic", ".heif" ->
-                // for HEIC files, return the correct MIME file type
-                // but still the browser could be unable to render, user may need to convert to JPEG
-                    "image/heic";
-            default -> "application/octet-stream"; // general binary file type
-        };
+        switch (extension) {
+            case ".jpg":
+            case ".jpeg":
+                return "image/jpeg";
+            case ".png":
+                return "image/png";
+            case ".gif":
+                return "image/gif";
+            case ".webp":
+                return "image/webp";
+            case ".heic":
+            case ".heif":
+                // 对于HEIC文件，返回正确的MIME类型
+                // 但浏览器可能仍然无法显示，建议用户转换为JPEG
+                return "image/heic";
+            default:
+                return "application/octet-stream"; // 通用二进制文件类型
+        }
     }
 
     private boolean isValidImageExtension(String extension) {
-        return extension.equals(".jpg") || extension.equals(".jpeg") || 
-               extension.equals(".png") || extension.equals(".gif") ||
-               extension.equals(".webp") || extension.equals(".heic") || 
-               extension.equals(".heif");
+        return extension.equals(".jpg") || extension.equals(".jpeg") ||
+                extension.equals(".png") || extension.equals(".gif") ||
+                extension.equals(".webp") || extension.equals(".heic") ||
+                extension.equals(".heif");
     }
-} 
+}

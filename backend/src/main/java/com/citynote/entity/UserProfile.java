@@ -1,11 +1,9 @@
 package com.citynote.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 
 import java.util.List;
 
-@Data
 @Entity
 @Table(name = "user_profiles")
 public class UserProfile {
@@ -18,11 +16,7 @@ public class UserProfile {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @OneToMany(cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY,
-            orphanRemoval = true,
-            mappedBy = "userProfile"
-    )
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "userProfile")
     private List<EventEntity> events;
 
     // Manual getters and setters for Lombok compatibility
