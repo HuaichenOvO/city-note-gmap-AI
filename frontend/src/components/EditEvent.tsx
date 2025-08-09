@@ -18,6 +18,7 @@ export const EditEvent: React.FC<EditEventProps> = ({
   const [content, setContent] = useState(note.content);
   const [eventType, setEventType] = useState<'TEXT' | 'IMAGE'>(note.eventType as 'TEXT' | 'IMAGE');
   const [existingPictureLinks, setExistingPictureLinks] = useState<string[]>(note.pictureLinks || []);
+  const [pictureLinksToDelete, setPictureLinksToDelete] = useState<string[]>([]);
   const [pictureFiles, setPictureFiles] = useState<File[]>([]);
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,14 +35,16 @@ export const EditEvent: React.FC<EditEventProps> = ({
   };
 
   const removeExistingLink = (index: number) => {
+    const linkToDelete = existingPictureLinks[index];
     setExistingPictureLinks(prev => prev.filter((_, i) => i !== index));
+    setPictureLinksToDelete([...pictureLinksToDelete, linkToDelete]);
   };
 
-  const updateExistingLink = (index: number, value: string) => {
-    const newLinks = [...existingPictureLinks];
-    newLinks[index] = value;
-    setExistingPictureLinks(newLinks);
-  };
+  // const updateExistingLink = (index: number, value: string) => {
+  //   const newLinks = [...existingPictureLinks];
+  //   newLinks[index] = value;
+  //   setExistingPictureLinks(newLinks);
+  // };
 
   const uploadImages = async (files: File[]): Promise<string[]> => {
     const uploadPromises = files.map(async (file) => {
@@ -65,6 +68,21 @@ export const EditEvent: React.FC<EditEventProps> = ({
     return results.filter(url => url !== null);
   };
 
+  const deleteImages = async (fileLinks: string[]) => {
+    const deletePromises = fileLinks.map(async (file) => {
+      try {
+        const response = await fileUploadApi.deleteImage(file);
+        return response;
+      } catch (error) {
+        console.error('Failed to delete image:', error);
+        throw error;
+      }
+    });
+
+    const results = await Promise.all(deletePromises);
+    return results;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -86,9 +104,15 @@ export const EditEvent: React.FC<EditEventProps> = ({
       let finalImageUrls: string[] = [...existingPictureLinks];
 
       // 如果有新上传的图片文件，先上传
+      // if there are new picture files to upload, then upload them first
       if (eventType === 'IMAGE' && pictureFiles.length > 0) {
         const newUploadedUrls = await uploadImages(pictureFiles);
         finalImageUrls = [...finalImageUrls, ...newUploadedUrls];
+      }
+
+      // if there are picture files to delete, then delete them as well
+      if (eventType === 'IMAGE' && pictureLinksToDelete.length > 0) {
+        const response = await deleteImages(pictureLinksToDelete);
       }
 
       const eventData: CreateEventType = {
@@ -196,19 +220,19 @@ export const EditEvent: React.FC<EditEventProps> = ({
               Images
             </label>
 
-            {/* 现有图片链接 */}
+            {/* existing picture links */}
             {existingPictureLinks.length > 0 && (
               <div className="mb-4">
                 <h4 className="text-sm font-medium text-gray-700 mb-2">Existing Images:</h4>
                 {existingPictureLinks.map((link, index) => (
                   <div key={`existing-${index}`} className="flex gap-2 mb-2">
-                    <input
-                      type="url"
-                      value={link}
-                      onChange={(e) => updateExistingLink(index, e.target.value)}
+                    <p
+                      // type="url"
+                      // value={link}
+                      // onChange={(e) => updateExistingLink(index, e.target.value)}
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      placeholder="Enter image URL"
-                    />
+                    // placeholder="Enter image URL"
+                    >{link}</p>
                     <button
                       type="button"
                       onClick={() => removeExistingLink(index)}
@@ -221,7 +245,7 @@ export const EditEvent: React.FC<EditEventProps> = ({
               </div>
             )}
 
-            {/* 文件上传区域 */}
+            {/* file upload */}
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-4">
               <input
                 type="file"
@@ -235,7 +259,8 @@ export const EditEvent: React.FC<EditEventProps> = ({
               </p>
             </div>
 
-            {/* 已选择的新文件列表 */}
+            {/* 待上传的新文件列表 */}
+            {/* new files to be uploaded */}
             {pictureFiles.length > 0 && (
               <div className="space-y-2 mb-4">
                 <h4 className="text-sm font-medium text-gray-700">New Files to Upload:</h4>
@@ -254,7 +279,7 @@ export const EditEvent: React.FC<EditEventProps> = ({
               </div>
             )}
 
-            {/* 上传预览 */}
+            {/* upload preview */}
             {uploadedImageUrls.length > 0 && (
               <div className="mt-4">
                 <h4 className="text-sm font-medium text-gray-700 mb-2">Newly Uploaded Images:</h4>
