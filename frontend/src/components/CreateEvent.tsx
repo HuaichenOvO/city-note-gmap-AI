@@ -3,7 +3,6 @@ import { eventApi } from '../api/eventApi';
 import { fileUploadApi } from '../api/fileUploadApi';
 import { textGenAptApi } from '../api/textGenApi';
 import { CreateEventType } from '../types/NoteType';
-import { textGenAptApi } from '../api/textGenApi';
 
 interface CreateEventProps {
   countyId: string | null;
