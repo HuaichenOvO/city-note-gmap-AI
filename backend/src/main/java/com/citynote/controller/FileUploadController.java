@@ -1,5 +1,7 @@
 package com.citynote.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,8 @@ import java.net.MalformedURLException;
 @RestController
 @RequestMapping("/upload")
 public class FileUploadController {
+//    private static final Logger logger = LoggerFactory.getLogger(FileUploadController.class);
+
     private final Path uploadDir;
 
     public FileUploadController(@Value("${file.upload.path:uploads/}") String uploadPath) {
@@ -35,6 +39,8 @@ public class FileUploadController {
         try {
             System.out.printf("[File Controller] Request uploading file: %s, size: %s bytes, path: %s\n",
                     file.getOriginalFilename(), file.getSize(), uploadDir.toString());
+//            logger.info("[File Controller] Request uploading file: {0}, size: {1} bytes, path: {2}",
+//                    file.getOriginalFilename(), file.getSize(), uploadDir.toString());
 
             // Check file size (50MB limit)
             if (file.getSize() > 50 * 1024 * 1024) {

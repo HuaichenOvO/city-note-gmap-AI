@@ -1,5 +1,6 @@
 package com.citynote.service.impl;
 
+import com.citynote.controller.FileUploadController;
 import com.citynote.dto.EventRequestDTO;
 import com.citynote.dto.EventResponseDTO;
 import com.citynote.entity.BlobEntity;
@@ -13,6 +14,8 @@ import com.citynote.service.EventService;
 // import com.citynote.security.JwtTokenUtil;
 // import com.sun.jdi.request.EventRequest;
 // import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -41,6 +44,7 @@ public class RdbEventServImpl implements EventService {
     private String uploadPath;
     private final Path uploadDir;
 
+//    private static final Logger logger = LoggerFactory.getLogger(FileUploadController.class);
     private final EventRepository eventRepository;
     private final BlobRepository blobRepository;
     private final UserProfileRepository userProfileRepository;
