@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { eventApi } from '../api/eventApi';
-import { fileUploadApi } from '../api/fileUploadApi';
+import { fileApi } from '../api/fileApi';
 import { NoteType, CreateEventType } from '../types/NoteType';
 
 interface EditEventProps {
@@ -56,8 +56,8 @@ export const EditEvent: React.FC<EditEventProps> = ({
       }
 
       try {
-        const imageUrl = await fileUploadApi.uploadImage(file);
-        return imageUrl;
+        const imageName = await fileApi.uploadImage(file);
+        return imageName;
       } catch (error) {
         console.error('Failed to upload image:', error);
         throw error;
@@ -68,10 +68,10 @@ export const EditEvent: React.FC<EditEventProps> = ({
     return results.filter(url => url !== null);
   };
 
-  const deleteImages = async (fileLinks: string[]) => {
-    const deletePromises = fileLinks.map(async (file) => {
+  const deleteImages = async (fileNames: string[]) => {
+    const deletePromises = fileNames.map(async (file) => {
       try {
-        const response = await fileUploadApi.deleteImage(file);
+        const response = await fileApi.deleteImage(file);
         return response;
       } catch (error) {
         console.error('Failed to delete image:', error);

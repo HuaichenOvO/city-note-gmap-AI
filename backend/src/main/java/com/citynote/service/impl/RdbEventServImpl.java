@@ -23,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -38,7 +39,7 @@ public class RdbEventServImpl implements EventService {
 
     @Value("${file.upload.path:uploads/}")
     private String uploadPath;
-    private final String filePrefix = "http://localhost:8080/api/upload/image";
+    private final Path uploadDir;
 
     private final EventRepository eventRepository;
     private final BlobRepository blobRepository;
@@ -46,11 +47,14 @@ public class RdbEventServImpl implements EventService {
     private final CountyRepository countyRepository;
     private final EventLikeRepository eventLikeRepository;
 
-    public RdbEventServImpl(EventRepository eventRepository,
+    public RdbEventServImpl(
+            @Value("${file.upload.path:uploads/}") String uploadPath,
+            EventRepository eventRepository,
             BlobRepository blobRepository,
             UserProfileRepository userProfileRepository,
             CountyRepository countyRepository,
             EventLikeRepository eventLikeRepository) {
+        this.uploadDir = Paths.get(System.getProperty("user.dir"), uploadPath).toAbsolutePath();
         this.eventRepository = eventRepository;
         this.blobRepository = blobRepository;
         this.userProfileRepository = userProfileRepository;
@@ -242,11 +246,8 @@ public class RdbEventServImpl implements EventService {
                 filenames = blobs.stream()
                         .map(s -> {
                             String filename = s.getFilename();
-                            if (!filename.startsWith(filePrefix)) {
-                                throw new RuntimeException("Invalid filename: " + filename);
-                            }
-                            String fileName = filename.substring(filePrefix.length());
-                            return Paths.get(rootDir, uploadPath, fileName).toAbsolutePath().toString();
+                            Path destPath = uploadDir.resolve(filename).toAbsolutePath();
+                            return destPath.toString();
                         })
                         .toList();
             } catch (Exception e) {
@@ -364,41 +365,45 @@ public class RdbEventServImpl implements EventService {
      * Check if current user can modify the specified event
      */
     public Boolean canUserModifyEvent(int eventId) {
+        StringBuilder messageBuilder = new StringBuilder("[Event Service]");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() ||
                 "anonymousUser".equals(authentication.getName())) {
-            System.out.println("Permission check failed: No authentication");
+            messageBuilder.append("\n\tPermission check failed: No authentication");
+            System.out.println(messageBuilder);
             return false;
         }
 
         String currentUsername = authentication.getName();
-        System.out
-                .println("[Event Service] Checking permissions for user: " + currentUsername + " on event: " + eventId);
+        messageBuilder.append("\n\tPermissions for user: ").append(currentUsername)
+                    .append(" on event: ").append(eventId);
 
         Optional<EventEntity> eventOpt = eventRepository.findById(eventId);
 
         if (eventOpt.isPresent()) {
             EventEntity event = eventOpt.get();
-            System.out.println("[Event Service] Found event: " + event.getTitle());
+            messageBuilder.append("\n\tFound event: ").append(event.getTitle());
 
             if (event.getUserProfile() != null) {
-                System.out.println("[Event Service] Event has user profile: " + event.getUserProfile().getId());
+                messageBuilder.append("\n\tEvent has user profile: ").append(event.getUserProfile().getId());
                 if (event.getUserProfile().getUser() != null) {
                     String eventOwnerUsername = event.getUserProfile().getUser().getUsername();
-                    System.out.println("[Event Service] Event owner: " + eventOwnerUsername);
+                    messageBuilder.append("\n\tEvent owner: ").append(eventOwnerUsername);
                     boolean canModify = currentUsername.equals(eventOwnerUsername);
-                    System.out.println("[Event Service] Can modify: " + canModify);
+                    messageBuilder.append("\n\tCan modify: ").append(canModify);
+                    System.out.println(messageBuilder);
                     return canModify;
                 } else {
-                    System.out.println("[Event Service] Event user profile has no user");
+                    messageBuilder.append("\n\tEvent user profile has no user");
                 }
             } else {
-                System.out.println("[Event Service] Event has no user profile");
+                messageBuilder.append("\n\tEvent has no user profile");
             }
         } else {
-            System.out.println("[Event Service] Event not found with ID: " + eventId);
+            messageBuilder.append("\n\tEvent not found with ID: ").append(eventId);
         }
 
+        System.out.println(messageBuilder);
         return false;
     }
 

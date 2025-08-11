@@ -23,17 +23,18 @@ import java.net.MalformedURLException;
 @RestController
 @RequestMapping("/upload")
 public class FileUploadController {
-    private final String filePrefix = "/api/upload/image";
+    private final Path uploadDir;
 
-    @Value("${file.upload.path:uploads/}")
-    private String uploadPath;
+    public FileUploadController(@Value("${file.upload.path:uploads/}") String uploadPath) {
+        uploadDir = Paths.get(System.getProperty("user.dir"), uploadPath).toAbsolutePath();
+    }
 
     @PostMapping("/image")
     public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file,
             HttpServletRequest request) {
         try {
             System.out.printf("[File Controller] Request uploading file: %s, size: %s bytes, path: %s\n",
-                    file.getOriginalFilename(), file.getSize(), uploadPath);
+                    file.getOriginalFilename(), file.getSize(), uploadDir.toString());
 
             // Check file size (50MB limit)
             if (file.getSize() > 50 * 1024 * 1024) {
@@ -54,16 +55,6 @@ public class FileUploadController {
                         .body(Map.of("error", "Only image files are allowed (jpg, jpeg, png, gif, webp, heic, heif)"));
             }
 
-            // create upload directory - using absolute path
-            Path uploadDir;
-            if (uploadPath.startsWith("/")) {
-                // absolute path
-                uploadDir = Paths.get(uploadPath);
-            } else {
-                // convert the relative path to absolute apth
-                uploadDir = Paths.get(System.getProperty("user.dir"), uploadPath);
-            }
-
             if (!Files.exists(uploadDir)) {
                 System.out.println("Creating upload directory...");
                 Files.createDirectories(uploadDir);
@@ -79,19 +70,12 @@ public class FileUploadController {
             String serverUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
             String imageUrl = serverUrl + "/api/upload/image/" + filename;
 
-            System.out.printf("""
-                    [File Controller] File saved successfully.
-                    \tUpload directory path: %s
-                    \tGenerated filename: %s
-                    \tGenerated full path: %s
-                    \tImage URL: %s
-                    """,
-                    uploadDir.toAbsolutePath(), filename, destPath.toAbsolutePath(), imageUrl);
+            System.out.printf("[File Controller] File saved successfully.\tFile name: %s.\tFull path: %s\n",
+                    filename, destPath.toAbsolutePath());
 
             Map<String, String> response = new HashMap<>();
             response.put("url", imageUrl);
             response.put("filename", filename);
-            // ------------------------------------------------
 
             return ResponseEntity.ok(response);
         } catch (IOException e) {
@@ -111,21 +95,14 @@ public class FileUploadController {
     public ResponseEntity<Resource> getImage(@PathVariable String filename) {
         System.out.println("[File Controller] <GET /image/{filename:.+}> - " + filename);
         try {
-            Path uploadDir;
-            if (uploadPath.startsWith("/")) {
-                // absolute path
-                uploadDir = Paths.get(uploadPath);
-            } else {
-                // relative path to absolute path
-                uploadDir = Paths.get(System.getProperty("user.dir"), uploadPath);
-            }
             Path filePath = uploadDir.resolve(filename).normalize();
-            System.out.println("[GET /image/{filename:.+}] - " + filePath.toAbsolutePath());
+//            System.out.println("[GET /image/{filename:.+}] - " + filePath.toAbsolutePath());
 
             Resource resource = new UrlResource(filePath.toUri());
             if (resource.exists()) {
-                // 根据文件扩展名确定Content-Type
+                // determine the file-extensions based on Content-Type
                 String contentType = getContentType(filename);
+                System.out.printf("[File Controller] <GET content type: %s\n", contentType);
                 return ResponseEntity.ok()
                         .contentType(MediaType.parseMediaType(contentType))
                         .body(resource);
@@ -139,20 +116,10 @@ public class FileUploadController {
 
     @DeleteMapping("/image")
     public ResponseEntity<Integer> removeFile(@RequestBody String filename) {
-        System.out.println("[File Controller] Delete - " + filename);
         try {
-            // assuming the file starts with prefix: "/api/upload/image"
-            if (!filename.startsWith(filePrefix)) {
-                return ResponseEntity.badRequest().body(-3);
-            }
-            String fileName = filename.substring(filePrefix.length());
-            String rootDir = System.getProperty("user.dir");
-            String fullPath = Paths.get(rootDir, uploadPath, fileName).toAbsolutePath().toString();
+            String fullPath = uploadDir.resolve(filename).toAbsolutePath().toString();
 
-            System.out.printf("""
-                    [File Controller] request to remove URI: %s
-                    \tconverted to filepath: %s
-                    """, filename, fullPath);
+            System.out.printf("[File Controller] request to remove file: %s\n", fullPath);
 
             File targetFile = new File(fullPath);
             if (!targetFile.exists()) {
@@ -190,8 +157,9 @@ public class FileUploadController {
                 return "image/webp";
             case ".heic":
             case ".heif":
-                // 对于HEIC文件，返回正确的MIME类型
-                // 但浏览器可能仍然无法显示，建议用户转换为JPEG
+                // For HEIC files, return the correct MIME type,
+                // but the browser could still be unable to display them.
+                // It is recommended that users convert them to JPEG
                 return "image/heic";
             default:
                 return "application/octet-stream"; // 通用二进制文件类型
@@ -199,9 +167,10 @@ public class FileUploadController {
     }
 
     private boolean isValidImageExtension(String extension) {
-        return extension.equals(".jpg") || extension.equals(".jpeg") ||
-                extension.equals(".png") || extension.equals(".gif") ||
-                extension.equals(".webp") || extension.equals(".heic") ||
-                extension.equals(".heif");
+        String lowerExtension = extension.toLowerCase();
+        return lowerExtension.equals(".jpg") || lowerExtension.equals(".jpeg") ||
+                lowerExtension.equals(".png") || lowerExtension.equals(".gif") ||
+                lowerExtension.equals(".webp") || lowerExtension.equals(".heic") ||
+                lowerExtension.equals(".heif");
     }
 }

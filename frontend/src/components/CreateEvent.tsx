@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { eventApi } from '../api/eventApi';
-import { fileUploadApi } from '../api/fileUploadApi';
+import { fileApi } from '../api/fileApi';
 import { textGenAptApi } from '../api/textGenApi';
 import { CreateEventType } from '../types/NoteType';
 
@@ -53,8 +53,8 @@ export const CreateEvent: React.FC<CreateEventProps> = ({
       }
 
       try {
-        const imageUrl = await fileUploadApi.uploadImage(file);
-        return imageUrl;
+        const imageName = await fileApi.uploadImage(file);
+        return imageName;
       } catch (error) {
         console.error('Failed to upload image:', error);
         throw error;
@@ -98,12 +98,12 @@ export const CreateEvent: React.FC<CreateEventProps> = ({
     setIsSubmitting(true);
 
     try {
-      let finalImageUrls: string[] = [];
+      let finalImageNames: string[] = [];
 
       // 如果有图片文件，先上传
       if (eventType === 'IMAGE' && pictureFiles.length > 0) {
         setIsUploading(true);
-        finalImageUrls = await uploadImages(pictureFiles);
+        finalImageNames = await uploadImages(pictureFiles);
         setIsUploading(false);
       }
 
@@ -111,7 +111,7 @@ export const CreateEvent: React.FC<CreateEventProps> = ({
         title: title.trim(),
         content: content.trim(),
         eventType,
-        pictureLinks: eventType === 'IMAGE' ? finalImageUrls : [],
+        pictureLinks: eventType === 'IMAGE' ? finalImageNames : [],
         countyId: parseInt(countyId)
       };
 
