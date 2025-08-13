@@ -74,14 +74,9 @@ check_local_env() {
 build_app() {
     echo -e "${YELLOW}2. Building application...${NC}"
     
-    # # Run tests
-    # echo "Running tests..."
-    # ./run-tests.sh
-    # if [ $? -ne 0 ]; then
-    #     echo -e "${RED}Tests failed! Deployment stopped${NC}"
-    #     exit 1
-    # fi
-    # echo -e "${GREEN}Tests passed!${NC}"
+    # Run backend tests (temporarily disabled due to test configuration issues)
+    echo -e "${YELLOW}Backend tests temporarily disabled - skipping...${NC}"
+    echo -e "${YELLOW}Note: Tests need to be fixed separately. See run-tests.sh for details.${NC}"
     
     # Build backend
     echo "Building backend..."
@@ -89,12 +84,23 @@ build_app() {
     mvn clean package -DskipTests
     cd ..
     
-    # Build frontend
-    echo "Building frontend..."
+    # Run frontend tests
+    echo -e "${YELLOW}Running frontend tests...${NC}"
     cd frontend
     npm install
+    npm test -- --run --reporter=verbose
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Frontend tests failed! Deployment stopped${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}Frontend tests passed!${NC}"
+    
+    # Build frontend
+    echo "Building frontend..."
     npm run build
     cd ..
+    
+    echo -e "${GREEN}Build completed! Proceeding with deployment...${NC}"
 }
 
 # Function: Prepare deployment package

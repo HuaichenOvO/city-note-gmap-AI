@@ -237,12 +237,18 @@ public class RdbEventServImpl implements EventService {
 
     @Transactional
     public Boolean deleteEvent(int eventId) {
+        System.out.println("[Event Service] Starting deleteEvent for eventId: " + eventId);
+        System.out.println("[Event Service] uploadDir: " + uploadDir);
+        
         // if no related data in DB, there will be no errors
         Optional<EventEntity> eOptional = eventRepository.findById(eventId);
         if (eOptional.isPresent()) {
             String rootDir = System.getProperty("user.dir");
+            System.out.println("[Event Service] rootDir: " + rootDir);
             EventEntity event = eOptional.get();
             List<BlobEntity> blobs = blobRepository.findBlobEntitiesByEvent(event);
+            System.out.println("[Event Service] Found " + blobs.size() + " blobs to delete");
+            
             List<String> filenames;
 
             // get the file names
@@ -251,10 +257,12 @@ public class RdbEventServImpl implements EventService {
                         .map(s -> {
                             String filename = s.getFilename();
                             Path destPath = uploadDir.resolve(filename).toAbsolutePath();
+                            System.out.println("[Event Service] Mapping filename: " + filename + " to path: " + destPath);
                             return destPath.toString();
                         })
                         .toList();
             } catch (Exception e) {
+                System.err.println("[Event Service] Error mapping filenames: " + e.getMessage());
                 e.printStackTrace();
                 return false;
             }
@@ -263,29 +271,43 @@ public class RdbEventServImpl implements EventService {
             try {
                 for (String fullPath : filenames) {
                     File targetFile = new File(fullPath);
+                    System.out.println("[Event Service] Attempting to delete file: " + fullPath);
+                    System.out.println("[Event Service] File exists: " + targetFile.exists());
+                    System.out.println("[Event Service] File absolute path: " + targetFile.getAbsolutePath());
+                    
                     if (!targetFile.exists()) {
-                        throw new RuntimeException("File does not exist: " + fullPath);
+                        System.err.println("[Event Service] File does not exist: " + fullPath);
+                        // Don't throw exception, just log and continue
+                        continue;
                     }
                     if (targetFile.delete()) {
                         System.out.println("[Event Service] successfully removed file: " + fullPath);
                     } else {
-                        throw new RuntimeException("Failed to remove file: " + fullPath);
+                        System.err.println("[Event Service] Failed to remove file: " + fullPath);
+                        // Don't throw exception, just log and continue
                     }
                 }
-            } catch (Error error) {
-                error.printStackTrace();
-                return false;
+            } catch (Exception e) {
+                System.err.println("[Event Service] Error deleting files: " + e.getMessage());
+                e.printStackTrace();
+                // Don't return false here, continue with entity deletion
             }
 
             // delete the entities in the repository
             try {
+                System.out.println("[Event Service] Deleting blob entities...");
                 blobRepository.deleteAll(blobs);
+                System.out.println("[Event Service] Deleting event entity...");
                 eventRepository.delete(event);
+                System.out.println("[Event Service] Event deletion completed successfully");
             } catch (Exception e) {
+                System.err.println("[Event Service] Error deleting entities: " + e.getMessage());
+                e.printStackTrace();
                 return false;
             }
             return true;
         }
+        System.out.println("[Event Service] Event not found with id: " + eventId);
         return false;
     }
 

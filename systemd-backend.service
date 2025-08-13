@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=ec2-user
 WorkingDirectory=/opt/city-note
-ExecStart=/usr/bin/java -jar city-note-backend.jar --spring.config.location=classpath:/,file:/opt/city-note/
+ExecStart=/usr/lib/jvm/java-21-amazon-corretto.x86_64/bin/java -jar city-note-backend.jar --spring.config.location=classpath:/,file:/opt/city-note/
 Restart=always
 RestartSec=10
 

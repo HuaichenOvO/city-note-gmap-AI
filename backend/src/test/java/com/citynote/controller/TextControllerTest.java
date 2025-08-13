@@ -42,10 +42,10 @@ class TextControllerTest {
 
         // Arrange - Set up test data
         validRequest = new GenTextRequestDTO();
-        validRequest.setTitle("sample title");
-        validRequest.setCurrentText("sample text");
+        validRequest.title = "sample title";
+        validRequest.currentText = "sample text";
         // Add any required fields for GenTextRequestDTO here
-        // Example: validRequest.setPrompt("Generate text about spring boot");
+        // Example: validRequest.URLs = Arrays.asList("http://example.com");
 
         expectedResponse = new GenTextResponseDTO();
         expectedResponse.setNewTitle("sample new title");

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # MySQL连接配置
-HOST="50.18.226.67"
+HOST="44.243.89.138"
 PORT="3306"
 USER="root"
 PASSWORD="root"

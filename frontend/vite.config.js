@@ -19,6 +19,12 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [tailwindcss(), react()],
+  define: {
+    __REACT_ROUTER_FUTURE_FLAGS__: JSON.stringify({
+      v7_startTransition: true,
+      v7_relativeSplatPath: true
+    })
+  },
   test: {
     globals: true,
     environment: 'jsdom',
