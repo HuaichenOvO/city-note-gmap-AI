@@ -3,10 +3,17 @@
 ## Project Description
 City Note is a city note application that integrates Google Maps and AI functionality, allowing users to create, view, and manage events on a map.
 
+## Project Contributor
+- Kaiyue Lin
+- Lixing Chen
+
+## Project Video
+[Youtube Link](https://www.youtube.com/watch?v=CSGNxq31pf4)
+
 ## Quick Start
 
 ### Requirements
-- Java 17+
+- Java 21+
 - Node.js 18+
 - Maven 3.6+
 - MySQL 8.0+
@@ -29,7 +36,6 @@ cd city-note-gmap-AI
 Before deploying, you need to modify the SSH key configuration in the `deploy.sh` script:
 
 ```bash
-# Edit deploy.sh file
 vim deploy.sh
 
 # Find the following line and modify it with your pem filename
