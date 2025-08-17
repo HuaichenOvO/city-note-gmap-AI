@@ -3,6 +3,15 @@
 ## Project Description
 City Note is a city note application that integrates Google Maps and AI functionality, allowing users to create, view, and manage events on a map.
 
+### Architecture
+![Architecture](/readme-picture/Architecture.png)
+
+### Database Schema
+![Database Schema](/readme-picture/DB.png)
+
+### Code Architecture
+![Code Architecture](/readme-picture/CodeArch.png)
+
 ## Project Contributor
 - Kaiyue Lin
 - Lixing Chen
@@ -25,7 +34,25 @@ git clone <repository-url>
 cd city-note-gmap-AI
 ```
 
-2. Start local development environment
+2. Setup your environment config
+    
+- Create a file `frontend/src/env.js`, do the following
+
+```javascript
+export const GMAP_MAP_ID = "MAP-ID-OF-YOUR-GOOGLE-API-ACCOUNT";
+export const GMAP_API_KEY = "API-KEY-OF-YOUR-GOOGLE-API-ACCOUNT";
+```
+
+- Create a file `backend/.env`, do the following
+
+```shell
+openai.api-key = YOUR-OPEN-API-KEY
+openai.base-url=https://api.openai.com/v1 # or your URL
+jwt.secret=your-secret-key-here-make-it-long-and-secure-in-production
+jwt.expiration=86400 # set up your own expiration time
+```
+
+3. Start local development environment
 ```bash
 ./dev.sh
 ```
